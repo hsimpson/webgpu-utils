@@ -1,0 +1,34 @@
+{
+  "name": "@donnerknalli/webgpu-utils",
+  "version": "0.0.1",
+  "description": "WebGPU Utilities",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "check-types": "tsc --noemit",
+    "lint:ts": "eslint . --fix",
+    "lint": "yarn check-types && yarn lint:ts",
+    "build": "tsup"
+  },
+  "author": "hsimpson",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hsimpson/webgpu-utils"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.10.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^22.5.4",
+    "@webgpu/types": "^0.1.44",
+    "eslint": "^9.10.0",
+    "prettier": "^3.3.3",
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.4.0"
+  }
+}
