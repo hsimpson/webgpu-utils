@@ -5,6 +5,7 @@ export async function init(
 ): Promise<WebGPUContext | undefined> {
   const gpu: GPU = navigator.gpu;
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!gpu) {
     console.error('No WebGPU support navigator.gpu not available!');
     return;

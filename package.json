@@ -12,7 +12,10 @@
     "check-types": "tsc --noemit",
     "lint:ts": "eslint . --fix",
     "lint": "yarn check-types && yarn lint:ts",
-    "build": "tsup"
+    "format:check": "prettier . --check",
+    "format:fix": "prettier . --write",
+    "build": "tsup",
+    "link": "npm link"
   },
   "author": "hsimpson",
   "license": "MIT",
@@ -26,6 +29,7 @@
     "@types/node": "^22.5.4",
     "@webgpu/types": "^0.1.44",
     "eslint": "^9.10.0",
+    "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.3",
     "tsup": "^8.2.4",
     "typescript": "^5.5.4",
