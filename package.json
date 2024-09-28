@@ -5,8 +5,16 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "package.json"
   ],
   "scripts": {
     "check-types": "tsc --noemit",
@@ -14,8 +22,9 @@
     "lint": "yarn check-types && yarn lint:ts",
     "format:check": "prettier . --check",
     "format:fix": "prettier . --write",
-    "build": "tsup",
-    "link": "npm link"
+    "build": "yarn lint && yarn format:check && tsup",
+    "link": "npm link",
+    "publish": "yarn build && npm publish"
   },
   "author": "hsimpson",
   "license": "MIT",
