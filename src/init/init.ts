@@ -1,5 +1,13 @@
 import { WebGPUContext } from '../models/wgpucontext';
 
+export function supportsWebGPU(): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (navigator.gpu) {
+    return true;
+  }
+  return false;
+}
+
 export async function init(
   deviceDescriptor?: GPUDeviceDescriptor,
 ): Promise<WebGPUContext | undefined> {
