@@ -1,4 +1,4 @@
-import { WebGPUContext } from '../models/wgpucontext';
+import { WebGPUContext } from './wgpucontext';
 
 export function supportsWebGPU(): boolean {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -8,7 +8,8 @@ export function supportsWebGPU(): boolean {
   return false;
 }
 
-export async function init(
+export async function createContext(
+  canvas: HTMLCanvasElement,
   deviceDescriptor?: GPUDeviceDescriptor,
 ): Promise<WebGPUContext | undefined> {
   const gpu: GPU = navigator.gpu;
@@ -25,10 +26,20 @@ export async function init(
     return;
   }
 
+  const gpuCanvasContext = canvas.getContext('webgpu');
+  if (!gpuCanvasContext) {
+    console.error('failed to get GPUCanvasContext');
+    return;
+  }
+
   const device = await adapter.requestDevice(deviceDescriptor);
 
   return {
+    canvas,
     adapter,
+    gpuCanvasContext,
+    adapterLimits: adapter.limits,
+    adapterInfo: adapter.info,
     device,
     queue: device.queue,
     preferredCanvasFormat: gpu.getPreferredCanvasFormat(),
