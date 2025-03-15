@@ -11,7 +11,7 @@ export default tseslint.config(
   eslintConfigPrettier,
 
   {
-    ignores: ['eslint.config.mjs', 'dist/**/*', '.prettierrc.js'],
+    ignores: ['coverage/**/*', 'dist/**/*', 'eslint.config.mjs', '.prettierrc.js'],
   },
   {
     languageOptions: {

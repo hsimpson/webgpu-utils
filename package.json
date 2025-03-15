@@ -1,6 +1,6 @@
 {
   "name": "@donnerknalli/webgpu-utils",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "hsimpson",
   "description": "WebGPU Utilities",
   "license": "MIT",
@@ -9,7 +9,8 @@
     "url": "https://github.com/hsimpson/webgpu-utils"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -30,7 +31,7 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
-    "npm:publish": "yarn test && yarn build && npm publish"
+    "npm:publish": "yarn build && yarn test && npm publish"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
