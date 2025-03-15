@@ -16,13 +16,13 @@ export async function createContext(
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!gpu) {
-    console.error('No WebGPU support navigator.gpu not available!');
+    console.error('No WebGPU support navigator.gpu not available! Navigator: ', navigator);
     return;
   }
 
   const adapter = await gpu.requestAdapter();
   if (!adapter) {
-    console.error('failed to get GPUAdapter');
+    console.error('failed to get GPUAdapter, gpu: ', gpu);
     return;
   }
 

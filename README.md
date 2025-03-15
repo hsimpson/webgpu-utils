@@ -7,7 +7,7 @@ WebGPU utilities provides a set of utilities for working with WebGPU.
 During development, you can run the build with the following command:
 
 ```sh
-npm run watch
+yarn watch
 ```
 
 To use the local version of the library in your project, you can run the following command:
