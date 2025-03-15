@@ -20,12 +20,13 @@ jobs:
           node-version-file: '.nvmrc'
 
       - name: Install node_modules
-        run: |
-          yarn install
-          yarn playwright install
+        run: yarn install --frozen-lockfile
+
+      - name: Install playwright
+        run: yarn playwright install --with-deps
 
       - name: Prettier
-        run: format:check
+        run: yarn format:check
 
       - name: ESLint
         run: yarn lint
