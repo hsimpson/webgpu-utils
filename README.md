@@ -4,6 +4,13 @@ WebGPU utilities provides a set of utilities for working with WebGPU.
 
 ## Development
 
+Installing packages:
+
+```sh
+yarn install
+yarn playwright install
+```
+
 During development, you can run the build with the following command:
 
 ```sh

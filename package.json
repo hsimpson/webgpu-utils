@@ -14,7 +14,6 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  
   "files": [
     "dist",
     "package.json"
@@ -30,6 +29,7 @@
     "link": "npm link",
     "test": "vitest run",
     "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
     "npm:publish": "yarn test && yarn build && npm publish"
   },
   "devDependencies": {
@@ -37,6 +37,7 @@
     "@testing-library/dom": "^10.4.0",
     "@types/node": "^22.13.10",
     "@vitest/browser": "^3.0.8",
+    "@vitest/coverage-v8": "^3.0.8",
     "@webgpu/types": "^0.1.56",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",

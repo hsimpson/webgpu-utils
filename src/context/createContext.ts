@@ -1,4 +1,4 @@
-import { WebGPUContext } from './wgpucontext';
+import { WebGPUContext } from '../_models/wgpucontext';
 
 export function supportsWebGPU(): boolean {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

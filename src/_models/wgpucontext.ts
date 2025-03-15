@@ -1,3 +1,4 @@
+/* v8 ignore start */
 export interface WebGPUContext {
   canvas: HTMLCanvasElement;
   adapter: GPUAdapter;
