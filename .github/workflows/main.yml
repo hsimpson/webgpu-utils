@@ -36,3 +36,5 @@ jobs:
 
       - name: Test
         run: yarn test
+
+      # ToDo: npm publish

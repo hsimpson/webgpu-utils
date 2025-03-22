@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WebGPUContext } from '../_models/wgpucontext';
+import { WebGPUContext } from '../context/webGPUContext';
 import { WebGPUBuffer } from './buffer';
 
 describe('WebGPUBuffer', () => {
