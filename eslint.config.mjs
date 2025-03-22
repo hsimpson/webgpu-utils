@@ -21,6 +21,8 @@ export default tseslint.config(
       },
     },
   },
+
+  // typescript eslint rules
   {
     rules: {
       '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'explicit' }],
@@ -44,6 +46,7 @@ export default tseslint.config(
 
       eqeqeq: 'error',
       'no-warning-comments': 'warn',
+      'require-await': 'error',
     },
   },
 );

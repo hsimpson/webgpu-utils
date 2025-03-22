@@ -1,8 +1,5 @@
-// models
-export * from './_models';
-
 // initialization
-export * from './context/createContext';
+export * from './context/webGPUContext';
 
 // buffer
 export * from './buffer/buffer';

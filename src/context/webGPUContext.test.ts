@@ -1,11 +1,11 @@
 import { afterEach, assert, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createContext, supportsWebGPU } from './createContext';
+import { WebGPUContext } from './webGPUContext';
 
 describe('WebGPUContext', () => {
   let canvas: HTMLCanvasElement;
 
   it('should support WebGPU', () => {
-    const suppported = supportsWebGPU();
+    const suppported = WebGPUContext.supportsWebGPU();
 
     expect(suppported).toBe(true);
   });
@@ -13,44 +13,47 @@ describe('WebGPUContext', () => {
   it('should not support WebGPU', () => {
     vi.stubGlobal('navigator', { gpu: undefined });
 
-    const suppported = supportsWebGPU();
+    const suppported = WebGPUContext.supportsWebGPU();
 
     expect(suppported).toBe(false);
   });
 
   it('should create context', async () => {
-    const result = await createContext(canvas);
+    const webGPUContext = new WebGPUContext(canvas);
+    const result = await webGPUContext.create();
 
-    expect(result).toBeDefined();
-    expect(result?.canvas).toBe(canvas);
-    expect(result?.adapter).toBeDefined();
-    expect(result?.gpuCanvasContext).toBeDefined();
-    expect(result?.device).toBeDefined();
-    expect(result?.queue).toBeDefined();
+    expect(result).toBeTruthy();
+    expect(webGPUContext.gpuCanvasContext).toBeDefined();
+    expect(webGPUContext.device).toBeDefined();
+    expect(webGPUContext.queue).toBeDefined();
 
-    assert.isString(result?.preferredCanvasFormat);
-    expect(result?.preferredCanvasFormat.length).toBeGreaterThan(0);
+    assert.isString(webGPUContext.preferredCanvasFormat);
+    expect(webGPUContext.preferredCanvasFormat.length).toBeGreaterThan(0);
   });
 
   it('should fail to create canvas context', async () => {
     canvas = vi.mocked({ getContext: (_: string) => null } as HTMLCanvasElement);
-    const result = await createContext(canvas);
+    const webGPUContext = new WebGPUContext(canvas);
+    const result = await webGPUContext.create();
 
-    expect(result).toBeUndefined();
+    expect(result).toBeFalsy();
   });
 
   it('should return undefined with no NavigatorGPU', async () => {
     vi.stubGlobal('navigator', { gpu: undefined });
-    const result = await createContext(canvas);
-    expect(result).toBeUndefined();
+    const webGPUContext = new WebGPUContext(canvas);
+    const result = await webGPUContext.create();
+
+    expect(result).toBeFalsy();
   });
 
   it('should return undefined with no GPUAdapter', async () => {
     vi.stubGlobal('navigator', { gpu: { requestAdapter: () => undefined } });
 
-    const result = await createContext(canvas);
+    const webGPUContext = new WebGPUContext(canvas);
+    const result = await webGPUContext.create();
 
-    expect(result).toBeUndefined();
+    expect(result).toBeFalsy();
   });
 
   beforeEach(() => {

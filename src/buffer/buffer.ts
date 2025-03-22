@@ -1,4 +1,4 @@
-import { WebGPUContext } from '../_models/wgpucontext';
+import { WebGPUContext } from '../context/webGPUContext';
 
 export enum BufferDataType {
   Bool = 'Bool',

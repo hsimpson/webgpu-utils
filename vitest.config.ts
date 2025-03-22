@@ -10,9 +10,7 @@ export default defineConfig({
     },
     browser: {
       enabled: true,
-      name: 'chromium',
       provider: 'playwright',
-      // headless: true,
       screenshotDirectory: 'screenshots',
       instances: [
         {
