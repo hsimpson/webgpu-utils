@@ -31,7 +31,8 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
-    "npm:publish": "yarn build && yarn test && npm publish"
+    "npm:publish": "yarn build && yarn test && npm publish",
+    "examples": "vite --config examples/vite.config.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
