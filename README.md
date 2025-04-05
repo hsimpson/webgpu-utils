@@ -8,7 +8,7 @@ Installing packages:
 
 ```sh
 yarn install
-yarn playwright install
+yarn playwright install --with-deps
 ```
 
 During development, you can run the build with the following command:

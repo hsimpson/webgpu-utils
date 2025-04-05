@@ -17,8 +17,12 @@ export default defineConfig({
           browser: 'chromium',
           launch: {
             args: [
+              /*
+               * disable headless mode for debugging
+               */
               '--headless',
               '--no-sandbox',
+
               /*
               Unsafe WebGPU Support
               Convenience flag for WebGPU development. Enables best-effort WebGPU support

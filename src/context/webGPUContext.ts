@@ -1,4 +1,6 @@
 export class WebGPUContext {
+  private readonly _canvas: HTMLCanvasElement;
+  private readonly _deviceDescriptor?: GPUDeviceDescriptor;
   private _device!: GPUDevice;
   private _gpuCanvasContext!: GPUCanvasContext;
   private _queue!: GPUQueue;
@@ -8,10 +10,10 @@ export class WebGPUContext {
   private _adapterInfo!: GPUAdapterInfo;
   private _features!: GPUSupportedFeatures;
 
-  public constructor(
-    private readonly canvas: HTMLCanvasElement,
-    private readonly deviceDescriptor?: GPUDeviceDescriptor,
-  ) {}
+  public constructor(canvas: HTMLCanvasElement, deviceDescriptor?: GPUDeviceDescriptor) {
+    this._canvas = canvas;
+    this._deviceDescriptor = deviceDescriptor;
+  }
 
   public static supportsWebGPU(): boolean {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -19,6 +21,10 @@ export class WebGPUContext {
       return true;
     }
     return false;
+  }
+
+  public get canvas(): HTMLCanvasElement {
+    return this._canvas;
   }
 
   public get device(): GPUDevice {
@@ -64,7 +70,7 @@ export class WebGPUContext {
       return false;
     }
 
-    const gpuCanvasContext = this.canvas.getContext('webgpu');
+    const gpuCanvasContext = this._canvas.getContext('webgpu');
     if (!gpuCanvasContext) {
       console.error('failed to get GPUCanvasContext');
       return false;
@@ -76,7 +82,7 @@ export class WebGPUContext {
     this._adapterInfo = adapter.info;
     this._features = adapter.features;
 
-    this._device = await adapter.requestDevice(this.deviceDescriptor);
+    this._device = await adapter.requestDevice(this._deviceDescriptor);
     this._queue = this.device.queue;
     this._preferredCanvasFormat = gpu.getPreferredCanvasFormat();
 
