@@ -75,11 +75,13 @@ export class WebGPUBuffer {
   ) {}
 
   public setData(key: string, dataEntry: BufferDataEntry) {
+    const { elementType, bufferDataTypeKind } = dataEntry.dataType;
+
     // check if MatCxR (column major) has correct scalar type
-    switch (dataEntry.dataType.bufferDataTypeKind) {
+    switch (bufferDataTypeKind) {
       case BufferDataTypeKind.Mat4x4:
-        if (dataEntry.dataType.elementType !== ScalarType.Float32) {
-          console.error(`Invalid elementType for ${dataEntry.dataType.bufferDataTypeKind}`);
+        if (elementType !== ScalarType.Float32 && elementType !== ScalarType.Float16) {
+          console.error(`Invalid elementType ${elementType} for ${bufferDataTypeKind}`);
           return;
         }
         break;
@@ -244,6 +246,16 @@ export class WebGPUBuffer {
               const boolArray = value.data as never[];
               const typedArray = new Uint32Array(array, offset, boolArray.length);
               typedArray.set(boolArray);
+              break;
+            }
+            case ScalarType.Int32: {
+              const typedArray = new Int32Array(array, offset, (value.data as Int32Array).length);
+              typedArray.set(value.data as Int32Array);
+              break;
+            }
+            case ScalarType.Uint32: {
+              const typedArray = new Uint32Array(array, offset, (value.data as Uint32Array).length);
+              typedArray.set(value.data as Uint32Array);
               break;
             }
             case ScalarType.Float32: {
