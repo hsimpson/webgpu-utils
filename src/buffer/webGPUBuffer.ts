@@ -171,7 +171,7 @@ export class WebGPUBuffer {
         return this.alignAndSizeVector4(elementType);
       case BufferDataTypeKind.Array:
       case BufferDataTypeKind.Mat4x4: {
-        if (Array.isArray(dataEntry.data)) {
+        if (Array.isArray(dataEntry.data) || ArrayBuffer.isView(dataEntry.data)) {
           const length: number = dataEntry.data['length'];
           return this.alignAndSizeArray(elementType, length);
         }

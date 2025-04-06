@@ -1,4 +1,12 @@
-import { Camera, CameraControls, WebGPUBuffer, WebGPUContext, WebGPUShader } from '../../dist/';
+import {
+  BufferDataTypeKind,
+  Camera,
+  CameraControls,
+  ScalarType,
+  WebGPUBuffer,
+  WebGPUContext,
+  WebGPUShader,
+} from '../../dist/';
 
 /*
           C
@@ -27,7 +35,7 @@ const COLORS = new Float32Array([
   0.0, 0.0, 1.0, 1.0,
 ]);
 
-const INDICES = new Uint16Array([0, 1, 2, 0]);
+const INDICES = new Uint32Array([0, 1, 2, 0]);
 
 class TriangleRenderer {
   private webGPUContext!: WebGPUContext;
@@ -92,47 +100,52 @@ class TriangleRenderer {
     );
     uniformBuffer.setData('model-matrix', {
       data: this.camera.modelMatrix,
-      dataType: BufferDataType.Mat4x4OfFloat32,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Mat4x4 },
     });
     uniformBuffer.setData('view-matrix', {
       data: this.camera.viewMatrix,
-      dataType: BufferDataType.Mat4x4OfFloat32,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Mat4x4 },
     });
     uniformBuffer.setData('perspective-matrix', {
       data: this.camera.perspectiveMatrix,
-      dataType: BufferDataType.Mat4x4OfFloat32,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Mat4x4 },
     });
+    uniformBuffer.writeBuffer();
+    // set the camera position
 
     // create buffers for the triangle
     this.positionsBuffer = new WebGPUBuffer(
       this.webGPUContext,
-      GPUBufferUsage.VERTEX,
+      GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
       'positions-buffer',
     );
     this.positionsBuffer.setData('positions', {
       data: POSITIONS,
-      dataType: BufferDataType.Vec3OfFloat32,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
+    this.positionsBuffer.writeBuffer();
 
     this.colorsBuffer = new WebGPUBuffer(
       this.webGPUContext,
-      GPUBufferUsage.VERTEX,
+      GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
       'colors-buffer',
     );
     this.colorsBuffer.setData('colors', {
       data: COLORS,
-      dataType: BufferDataType.Vec4OfFloat32,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
+    this.colorsBuffer.writeBuffer();
 
     this.indicesBuffer = new WebGPUBuffer(
       this.webGPUContext,
-      GPUBufferUsage.INDEX,
+      GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
       'indices-buffer',
     );
     this.indicesBuffer.setData('indices', {
       data: INDICES,
-      dataType: BufferDataType.ArrayOfUint16,
+      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
+    this.indicesBuffer.writeBuffer();
 
     // load shaders
     const vertexShader = new WebGPUShader(this.webGPUContext);
