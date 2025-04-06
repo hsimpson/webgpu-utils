@@ -169,7 +169,8 @@ export class WebGPUBuffer {
         return this.alignAndSizeVector3(elementType);
       case BufferDataTypeKind.Vec4:
         return this.alignAndSizeVector4(elementType);
-      case BufferDataTypeKind.Array: {
+      case BufferDataTypeKind.Array:
+      case BufferDataTypeKind.Mat4x4: {
         if (Array.isArray(dataEntry.data)) {
           const length: number = dataEntry.data['length'];
           return this.alignAndSizeArray(elementType, length);
@@ -269,6 +270,21 @@ export class WebGPUBuffer {
             }
             default:
               throw new Error(`Invalid elementType: ${value.dataType.elementType}`);
+          }
+          byteLength = (value.data as ArrayBufferView).byteLength;
+          break;
+        }
+        case BufferDataTypeKind.Mat4x4: {
+          switch (value.dataType.elementType) {
+            case ScalarType.Float32: {
+              const typedArray = new Float32Array(
+                array,
+                offset,
+                (value.data as Float32Array).length,
+              );
+              typedArray.set(value.data as Float32Array);
+              break;
+            }
           }
           byteLength = (value.data as ArrayBufferView).byteLength;
           break;

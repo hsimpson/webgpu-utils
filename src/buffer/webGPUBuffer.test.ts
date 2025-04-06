@@ -73,6 +73,13 @@ describe('WebGPUBuffer', () => {
     [BufferDataTypeKind.Array, ScalarType.Int32, 20, [23, -42, 47, -11, 123]],
     [BufferDataTypeKind.Array, ScalarType.Uint32, 20, [23, 42, 47, 11, 123]],
     [BufferDataTypeKind.Array, ScalarType.Float32, 20, [1.23, 4.56, 0.321, 42.23, -1.23]],
+
+    [
+      BufferDataTypeKind.Mat4x4,
+      ScalarType.Float32,
+      64,
+      [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+    ],
   ])(
     'single buffer data type kind: %s, and element type: %s size should be %i',
     (
