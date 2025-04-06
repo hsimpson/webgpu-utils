@@ -149,10 +149,10 @@ class TriangleRenderer {
 
     // load shaders
     const vertexShader = new WebGPUShader(this.webGPUContext);
-    await vertexShader.loadByUrl('shaders/triangle.vert');
+    await vertexShader.loadByUrl('shaders/triangle.vert.wgsl');
 
     const fragmentShader = new WebGPUShader(this.webGPUContext);
-    await fragmentShader.loadByUrl('shaders/triangle.frag');
+    await fragmentShader.loadByUrl('shaders/triangle.frag.wgsl');
 
     const positionBufferLayout: GPUVertexBufferLayout = {
       arrayStride: 3 * Float32Array.BYTES_PER_ELEMENT,
