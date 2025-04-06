@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, test, vi } from 'vitest';
-import { BufferDataTypeKind, ScalarType, WebGPUBuffer, WebGPUContext } from '../../dist';
+import { WebGPUContext } from '../context/webGPUContext';
+import { BufferDataTypeKind, ScalarType, WebGPUBuffer } from './webGPUBuffer';
 
 describe('WebGPUBuffer', () => {
   const webGPUContext: WebGPUContext = {
@@ -43,6 +44,37 @@ describe('WebGPUBuffer', () => {
       buffer.setData(`single-scalar-test-${scalarType}`, {
         data,
         dataType: { elementType: scalarType, bufferDataTypeKind: BufferDataTypeKind.Scalar },
+      });
+      buffer.writeBuffer();
+
+      // then
+      expect(deviceCreateBufferSpy).toHaveBeenCalledWith({ size: expectedSize, usage, label });
+      expect(queueWriteBufferSpy).toHaveBeenCalled();
+    },
+  );
+
+  test.each([
+    [BufferDataTypeKind.Vec2, ScalarType.Bool, 8, [true, false]],
+    [BufferDataTypeKind.Vec3, ScalarType.Bool, 16, [true, false, true]],
+    [BufferDataTypeKind.Vec4, ScalarType.Bool, 16, [true, false, true, false]],
+    [BufferDataTypeKind.Array, ScalarType.Bool, 20, [true, true, true, false, false]],
+  ])(
+    'single buffer data type kind: %s, and element type: %s size should be %i',
+    (
+      bufferDataTypeKind: BufferDataTypeKind,
+      scalarType: ScalarType,
+      expectedSize: number,
+      data,
+    ) => {
+      // given
+      const label = `single-array-test-${bufferDataTypeKind}-with-${scalarType}`;
+      const usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
+      const buffer = new WebGPUBuffer(webGPUContext, usage, label);
+
+      // when
+      buffer.setData(`single-array-test-${bufferDataTypeKind}`, {
+        data,
+        dataType: { elementType: scalarType, bufferDataTypeKind },
       });
       buffer.writeBuffer();
 

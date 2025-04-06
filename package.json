@@ -28,7 +28,7 @@
     "build": "tsup",
     "watch": "tsup --watch",
     "link": "npm link",
-    "test": "vitest run",
+    "test": "vitest run --reporter=verbose",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
     "npm:publish": "yarn format:check && yarn build && yarn format:check && yarn test && npm publish",

@@ -40,12 +40,21 @@ const scalarTypeAlignAndSize: Map<ScalarType, AlignAndSize> = new Map([
   [ScalarType.Int32, { align: 4, size: 4 }],
   [ScalarType.Uint32, { align: 4, size: 4 }],
   [ScalarType.Float32, { align: 4, size: 4 }],
-  // TODO: Float16 is not yet supported
+
+  // ToDo: Float16 is not yet supported
   [ScalarType.Float16, { align: 2, size: 2 }],
 ]);
 
 type BufferDataEntry = {
-  data: number | boolean | Float32Array | Int32Array | Uint32Array | Uint16Array;
+  data:
+    | boolean
+    | number
+    | boolean[]
+    | number[]
+    | Float32Array
+    | Int32Array
+    | Uint32Array
+    | Uint16Array;
   dataType: BufferDataType;
 };
 
@@ -178,7 +187,11 @@ export class WebGPUBuffer {
       if (value.dataType.bufferDataTypeKind === BufferDataTypeKind.Scalar) {
         byteLength = value.align;
       } else {
-        byteLength = (value.data as ArrayBufferView).byteLength;
+        if (ArrayBuffer.isView(value.data)) {
+          byteLength = (value.data as ArrayBufferView).byteLength;
+        } else if (Array.isArray(value.data)) {
+          byteLength = 4 * value.data['length'];
+        }
       }
       size += byteLength + this.getPadding(byteLength, Math.max(this.structAlignment, value.align));
     }
@@ -227,6 +240,12 @@ export class WebGPUBuffer {
         case BufferDataTypeKind.Vec4:
         case BufferDataTypeKind.Array: {
           switch (value.dataType.elementType) {
+            case ScalarType.Bool: {
+              const boolArray = value.data as never[];
+              const typedArray = new Uint32Array(array, offset, boolArray.length);
+              typedArray.set(boolArray);
+              break;
+            }
             case ScalarType.Float32: {
               const typedArray = new Float32Array(
                 array,
