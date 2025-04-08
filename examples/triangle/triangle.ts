@@ -1,3 +1,4 @@
+import { vec3 } from 'wgpu-matrix';
 import {
   BufferDataTypeKind,
   Camera,
@@ -52,6 +53,8 @@ class TriangleRenderer {
   private async initalization() {
     // get the canvas element
     const canvas = document.getElementById('webgpu_canvas') as HTMLCanvasElement;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
 
     // create a webgpu context
     this.webGPUContext = new WebGPUContext(canvas);
@@ -74,6 +77,7 @@ class TriangleRenderer {
 
     // create a camera
     this.camera = new Camera(45, presentationSize.width / presentationSize.height, 0.1, 1000);
+    this.camera.translate(vec3.create(0, 0, 5));
     new CameraControls(canvas, this.camera);
 
     // create a render target
@@ -106,8 +110,8 @@ class TriangleRenderer {
       data: this.camera.viewMatrix,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Mat4x4 },
     });
-    uniformBuffer.setData('perspective-matrix', {
-      data: this.camera.perspectiveMatrix,
+    uniformBuffer.setData('projection-matrix', {
+      data: this.camera.projectionMatrix,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Mat4x4 },
     });
     uniformBuffer.writeBuffer();

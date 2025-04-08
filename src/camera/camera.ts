@@ -1,8 +1,8 @@
-import { Mat4, mat4, utils, Vec3, vec3 } from 'wgpu-matrix';
-import { Object3D } from '../objects/object3d';
+import { Mat4, mat4, Quat, quat, utils, Vec3, vec3 } from 'wgpu-matrix';
 
-export class Camera extends Object3D {
-  private _perspectiveMatrix: Mat4 = mat4.identity();
+export class Camera {
+  private _modelMatrix: Mat4 = mat4.identity();
+  private _projectionMatrix: Mat4 = mat4.identity();
   private _viewMatrix: Mat4 = mat4.identity();
 
   private _fovY: number;
@@ -13,39 +13,50 @@ export class Camera extends Object3D {
 
   private _target: Vec3 = vec3.create(0, 0, 0);
   private _up: Vec3 = vec3.create(0, 1, 0);
+  private _eye = vec3.create(0, 0, 0);
+  private _rotation: Quat = quat.identity();
 
   public constructor(fovY: number, aspectRatio: number, near: number, far: number) {
-    super();
     this._near = near;
     this._far = far;
     this._fovY = fovY;
     this._aspectRatio = aspectRatio;
     this.updateViewMatrix();
-    this.updatePerspectiveMatrix();
+    this.updateProjectionMatrix();
   }
 
-  public get perspectiveMatrix(): Mat4 {
-    return this._perspectiveMatrix;
+  public get modelMatrix(): Mat4 {
+    return this._modelMatrix;
   }
 
   public get viewMatrix(): Mat4 {
     return this._viewMatrix;
   }
 
+  public get projectionMatrix(): Mat4 {
+    return this._projectionMatrix;
+  }
+
+  public translate(translation: Vec3) {
+    vec3.add(this._eye, translation, this._eye);
+    this.updateViewMatrix();
+  }
+
   protected updateViewMatrix() {
-    const translationMatrix = mat4.lookAt(this.position, this._target, this._up);
-    const rotationMatrix = mat4.fromQuat(this.rotation);
+    const translationMatrix = mat4.lookAt(this._eye, this._target, this._up);
+    const rotationMatrix = mat4.fromQuat(this._rotation);
 
     mat4.multiply(translationMatrix, rotationMatrix, this._viewMatrix);
   }
 
-  protected updatePerspectiveMatrix() {
+  protected updateProjectionMatrix() {
     mat4.perspective(
       utils.degToRad(this._fovY),
       this._aspectRatio,
       this._near,
       this._far,
-      this._perspectiveMatrix,
+      this._projectionMatrix,
     );
+    console.log('projectionMatrix', this._projectionMatrix);
   }
 }
