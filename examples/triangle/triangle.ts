@@ -36,7 +36,7 @@ const COLORS = new Float32Array([
   0.0, 0.0, 1.0, 1.0,
 ]);
 
-const INDICES = new Uint32Array([0, 1, 2, 0]);
+const INDICES = new Uint16Array([0, 1, 2, 0]);
 
 class TriangleRenderer {
   private webGPUContext!: WebGPUContext;
@@ -45,6 +45,7 @@ class TriangleRenderer {
   private depthTargetView!: GPUTextureView;
   private renderPipeLine!: GPURenderPipeline;
 
+  private uniformBuffer!: WebGPUBuffer;
   private positionsBuffer!: WebGPUBuffer;
   private colorsBuffer!: WebGPUBuffer;
   private indicesBuffer!: WebGPUBuffer;
@@ -97,25 +98,24 @@ class TriangleRenderer {
     this.depthTargetView = depthTarget.createView();
 
     // create a uniform buffer to hold camera data
-    const uniformBuffer = new WebGPUBuffer(
+    this.uniformBuffer = new WebGPUBuffer(
       this.webGPUContext,
       GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       'uniform-buffer',
     );
-    uniformBuffer.setData('model-matrix', {
+    this.uniformBuffer.setData('model-matrix', {
       data: this.camera.modelMatrix,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Mat4x4 },
     });
-    uniformBuffer.setData('view-matrix', {
+    this.uniformBuffer.setData('view-matrix', {
       data: this.camera.viewMatrix,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Mat4x4 },
     });
-    uniformBuffer.setData('projection-matrix', {
+    this.uniformBuffer.setData('projection-matrix', {
       data: this.camera.projectionMatrix,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Mat4x4 },
     });
-    uniformBuffer.writeBuffer();
-    // set the camera position
+    this.uniformBuffer.writeBuffer();
 
     // create buffers for the triangle
     this.positionsBuffer = new WebGPUBuffer(
@@ -147,7 +147,7 @@ class TriangleRenderer {
     );
     this.indicesBuffer.setData('indices', {
       data: INDICES,
-      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Array },
+      dataType: { elementType: ScalarType.Uint16, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this.indicesBuffer.writeBuffer();
 
@@ -200,7 +200,7 @@ class TriangleRenderer {
         {
           binding: 0,
           resource: {
-            buffer: uniformBuffer.getRawBuffer(),
+            buffer: this.uniformBuffer.getRawBuffer(),
           },
         },
       ],
@@ -239,6 +239,11 @@ class TriangleRenderer {
           },
         ],
       },
+      primitive: {
+        topology: 'triangle-list',
+        frontFace: 'cw',
+        cullMode: 'none',
+      },
       depthStencil: {
         depthWriteEnabled: true,
         depthCompare: 'less',
@@ -253,6 +258,8 @@ class TriangleRenderer {
   private render = () => {
     const rotation = (0.5 * Math.PI) / 180;
     this.camera.rotateZ(rotation);
+
+    this.uniformBuffer.writeBuffer();
 
     const colorAttachment: GPURenderPassColorAttachment = {
       view: this.webGPUContext.gpuCanvasContext.getCurrentTexture().createView(),
