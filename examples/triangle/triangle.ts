@@ -4,8 +4,12 @@ import {
   Camera,
   CameraControls,
   ScalarType,
+  WebGPUBindGroup,
+  WebGPUBindGroupLayout,
   WebGPUBuffer,
   WebGPUContext,
+  WebGPUPipelineLayout,
+  WebGPURenderPipeline,
   WebGPUShader,
 } from '../../dist/';
 
@@ -41,15 +45,14 @@ const INDICES = new Uint16Array([0, 1, 2, 0]);
 class TriangleRenderer {
   private webGPUContext!: WebGPUContext;
   private camera!: Camera;
-  private renderTargetView!: GPUTextureView;
   private depthTargetView!: GPUTextureView;
-  private renderPipeLine!: GPURenderPipeline;
+  private renderPipeLine!: WebGPURenderPipeline;
 
   private uniformBuffer!: WebGPUBuffer;
   private positionsBuffer!: WebGPUBuffer;
   private colorsBuffer!: WebGPUBuffer;
   private indicesBuffer!: WebGPUBuffer;
-  private uniformBindGroup!: GPUBindGroup;
+  private uniformBindGroup!: WebGPUBindGroup;
 
   private async initalization() {
     // get the canvas element
@@ -80,14 +83,6 @@ class TriangleRenderer {
     this.camera = new Camera(45, presentationSize.width / presentationSize.height, 0.1, 1000);
     this.camera.translate(vec3.create(0, 0, 5));
     new CameraControls(canvas, this.camera);
-
-    // create a render target
-    const renderTarget = this.webGPUContext.device.createTexture({
-      size: presentationSize,
-      format: this.webGPUContext.preferredCanvasFormat,
-      usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    });
-    this.renderTargetView = renderTarget.createView();
 
     // create a depth target
     const depthTarget = this.webGPUContext.device.createTexture({
@@ -152,13 +147,51 @@ class TriangleRenderer {
     this.indicesBuffer.writeBuffer();
 
     // load shaders
-    const vertexShader = new WebGPUShader(this.webGPUContext);
-    await vertexShader.loadByUrl('shaders/triangle.vert.wgsl');
+    const vertexShader = new WebGPUShader(
+      this.webGPUContext,
+      new URL('shaders/triangle.vert.wgsl', window.location.href),
+    );
+    await vertexShader.createShaderModule();
 
-    const fragmentShader = new WebGPUShader(this.webGPUContext);
-    await fragmentShader.loadByUrl('shaders/triangle.frag.wgsl');
+    const fragmentShader = new WebGPUShader(
+      this.webGPUContext,
+      new URL('shaders/triangle.frag.wgsl', window.location.href),
+    );
+    await fragmentShader.createShaderModule();
 
-    const positionBufferLayout: GPUVertexBufferLayout = {
+    const uniformBindGroupLayout = new WebGPUBindGroupLayout(this.webGPUContext, [
+      {
+        binding: 0,
+        visibility: GPUShaderStage.VERTEX,
+        buffer: {
+          type: 'uniform',
+        },
+      },
+    ]);
+    uniformBindGroupLayout.createBindGroupLayout();
+
+    this.uniformBindGroup = new WebGPUBindGroup(this.webGPUContext, uniformBindGroupLayout, [
+      {
+        binding: 0,
+        resource: {
+          buffer: this.uniformBuffer.getRawBuffer(),
+        },
+      },
+    ]);
+    this.uniformBindGroup.createBindGroup();
+
+    const webGPUPipelineLayout = new WebGPUPipelineLayout(this.webGPUContext, [
+      uniformBindGroupLayout,
+    ]);
+    webGPUPipelineLayout.createPipelineLayout();
+
+    this.renderPipeLine = new WebGPURenderPipeline(
+      this.webGPUContext,
+      webGPUPipelineLayout,
+      vertexShader,
+      fragmentShader,
+    );
+    this.renderPipeLine.addVertexBufferLayout({
       arrayStride: 3 * Float32Array.BYTES_PER_ELEMENT,
       stepMode: 'vertex',
       attributes: [
@@ -168,9 +201,8 @@ class TriangleRenderer {
           format: 'float32x3',
         },
       ],
-    };
-
-    const colorBufferLayout: GPUVertexBufferLayout = {
+    });
+    this.renderPipeLine.addVertexBufferLayout({
       arrayStride: 4 * Float32Array.BYTES_PER_ELEMENT,
       stepMode: 'vertex',
       attributes: [
@@ -180,78 +212,35 @@ class TriangleRenderer {
           format: 'float32x4',
         },
       ],
-    };
-
-    const uniformBindGroupLayout = this.webGPUContext.device.createBindGroupLayout({
-      entries: [
-        {
-          binding: 0,
-          visibility: GPUShaderStage.VERTEX,
-          buffer: {
-            type: 'uniform',
-          },
+    });
+    this.renderPipeLine.addColorTargetState({
+      format: 'bgra8unorm',
+      blend: {
+        alpha: {
+          srcFactor: 'src-alpha',
+          dstFactor: 'one-minus-src-alpha',
+          operation: 'add',
         },
-      ],
-    });
-
-    this.uniformBindGroup = this.webGPUContext.device.createBindGroup({
-      layout: uniformBindGroupLayout,
-      entries: [
-        {
-          binding: 0,
-          resource: {
-            buffer: this.uniformBuffer.getRawBuffer(),
-          },
+        color: {
+          srcFactor: 'src-alpha',
+          dstFactor: 'one-minus-src-alpha',
+          operation: 'add',
         },
-      ],
+      },
+      writeMask: GPUColorWrite.ALL,
+    });
+    this.renderPipeLine.setPrimitiveState({
+      topology: 'triangle-list',
+      frontFace: 'cw',
+      cullMode: 'none',
+    });
+    this.renderPipeLine.setDepthStencilState({
+      depthWriteEnabled: true,
+      depthCompare: 'less',
+      format: 'depth24plus-stencil8',
     });
 
-    const pipelineLayout = this.webGPUContext.device.createPipelineLayout({
-      bindGroupLayouts: [uniformBindGroupLayout],
-    });
-
-    const pipelineDescriptor: GPURenderPipelineDescriptor = {
-      layout: pipelineLayout,
-      vertex: {
-        module: vertexShader.shaderModule,
-        entryPoint: 'main',
-        buffers: [positionBufferLayout, colorBufferLayout],
-      },
-      fragment: {
-        module: fragmentShader.shaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: 'bgra8unorm',
-            blend: {
-              alpha: {
-                srcFactor: 'src-alpha',
-                dstFactor: 'one-minus-src-alpha',
-                operation: 'add',
-              },
-              color: {
-                srcFactor: 'src-alpha',
-                dstFactor: 'one-minus-src-alpha',
-                operation: 'add',
-              },
-            },
-            writeMask: GPUColorWrite.ALL,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'triangle-list',
-        frontFace: 'cw',
-        cullMode: 'none',
-      },
-      depthStencil: {
-        depthWriteEnabled: true,
-        depthCompare: 'less',
-        format: 'depth24plus-stencil8',
-      },
-    };
-
-    this.renderPipeLine = this.webGPUContext.device.createRenderPipeline(pipelineDescriptor);
+    this.renderPipeLine.createRenderPipeline();
   }
 
   // the render loop
@@ -287,8 +276,8 @@ class TriangleRenderer {
 
     const commandEncoder = this.webGPUContext.device.createCommandEncoder();
     const passEncoder = commandEncoder.beginRenderPass(renderPassDesc);
-    passEncoder.setPipeline(this.renderPipeLine);
-    passEncoder.setBindGroup(0, this.uniformBindGroup);
+    passEncoder.setPipeline(this.renderPipeLine.renderPipeLine);
+    passEncoder.setBindGroup(0, this.uniformBindGroup.bindGroup);
     passEncoder.setViewport(
       0,
       0,
