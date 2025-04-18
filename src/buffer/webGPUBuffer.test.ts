@@ -29,9 +29,7 @@ describe('WebGPUBuffer', () => {
     [ScalarType.Int32, 4, -42],
     [ScalarType.Uint32, 4, 42],
     [ScalarType.Float32, 4, 1234.5678],
-
-    // ToDo: Float16 is not yet supported
-    //[ScalarType.Float16, 2, 12.34],
+    [ScalarType.Float16, 2, 12.34],
   ])(
     'single buffer with scalar type: %s size should be %i',
     (scalarType: ScalarType, expectedSize: number, data) => {

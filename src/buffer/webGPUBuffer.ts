@@ -11,7 +11,6 @@ export enum ScalarType {
   Uint16 = 'Uint16',
 
   Float32 = 'Float32',
-  // ToDo: Float16 is not yet supported
   Float16 = 'Float16',
 }
 
@@ -42,8 +41,6 @@ const scalarTypeAlignAndSize: Map<ScalarType, AlignAndSize> = new Map([
   [ScalarType.Uint32, { align: 4, size: 4 }],
   [ScalarType.Uint16, { align: 2, size: 2 }],
   [ScalarType.Float32, { align: 4, size: 4 }],
-
-  // ToDo: Float16 is not yet supported
   [ScalarType.Float16, { align: 2, size: 2 }],
 ]);
 
@@ -223,12 +220,11 @@ export class WebGPUBuffer {
               typedArray[0] = value.data as number;
               break;
             }
-            // ToDo: Float16 is not yet supported
-            // case ScalarType.Float16: {
-            //   const typedArray = new Float16Array(array, offset, 1);
-            //   typedArray[0] = value.data as number;
-            //   break;
-            // }
+            case ScalarType.Float16: {
+              const typedArray = new Float16Array(array, offset, 1);
+              typedArray[0] = value.data as number;
+              break;
+            }
             case ScalarType.Float32: {
               const typedArray = new Float32Array(array, offset, 1);
               typedArray[0] = value.data as number;
