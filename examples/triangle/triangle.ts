@@ -54,7 +54,7 @@ class TriangleRenderer {
   private indicesBuffer!: WebGPUBuffer;
   private uniformBindGroup!: WebGPUBindGroup;
 
-  private async initalization() {
+  private async initialization() {
     // get the canvas element
     const canvas = document.getElementById('webgpu_canvas') as HTMLCanvasElement;
     canvas.width = canvas.offsetWidth;
@@ -72,7 +72,7 @@ class TriangleRenderer {
     // size of canvas
     const presentationSize = { width: canvas.width, height: canvas.height };
 
-    // configure the presenation context
+    // configure the presentation context
     this.webGPUContext.gpuCanvasContext.configure({
       device: this.webGPUContext.device,
       format: this.webGPUContext.preferredCanvasFormat,
@@ -303,7 +303,7 @@ class TriangleRenderer {
   };
 
   public async start() {
-    await this.initalization();
+    await this.initialization();
     this.render();
   }
 }
