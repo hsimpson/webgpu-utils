@@ -20,6 +20,9 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[wgsl]": {
+    "editor.formatOnSave": false
+  },
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "files.exclude": {

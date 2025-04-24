@@ -1,6 +1,6 @@
 import { WebGPUContext } from '../context/webGPUContext';
 
-// Info: alignement and size: https://www.w3.org/TR/WGSL/#alignment-and-size
+// Info: alignment and size: https://www.w3.org/TR/WGSL/#alignment-and-size
 // Info: structure member alignment: https://www.w3.org/TR/WGSL/#structure-member-layout
 
 export enum ScalarType {
@@ -22,6 +22,7 @@ export enum BufferDataTypeKind {
   Vec4 = 'Vec4',
 
   Array = 'Array',
+  Mat3x3 = 'Mat3x3',
   Mat4x4 = 'Mat4x4',
 }
 
@@ -51,6 +52,7 @@ type BufferDataEntry = {
     | boolean[]
     | number[]
     | Float32Array
+    | Float16Array
     | Int32Array
     | Uint32Array
     | Uint16Array;
@@ -78,12 +80,14 @@ export class WebGPUBuffer {
 
     // check if MatCxR (column major) has correct scalar type
     switch (bufferDataTypeKind) {
-      case BufferDataTypeKind.Mat4x4:
+      case BufferDataTypeKind.Mat3x3:
+      case BufferDataTypeKind.Mat4x4: {
         if (elementType !== ScalarType.Float32 && elementType !== ScalarType.Float16) {
           console.error(`Invalid elementType ${elementType} for ${bufferDataTypeKind}`);
           return;
         }
         break;
+      }
     }
 
     const alignment = this.getAlignAndSize(dataEntry);
@@ -159,6 +163,9 @@ export class WebGPUBuffer {
 
   private getAlignAndSize(dataEntry: BufferDataEntry): AlignAndSize | undefined {
     const { elementType, bufferDataTypeKind } = dataEntry.dataType;
+
+    // used for matrices
+    const baseAlign = elementType === ScalarType.Float16 ? 4 : 8;
     switch (bufferDataTypeKind) {
       case BufferDataTypeKind.Scalar:
         return this.alignAndSizeScalar(elementType);
@@ -168,12 +175,24 @@ export class WebGPUBuffer {
         return this.alignAndSizeVector3(elementType);
       case BufferDataTypeKind.Vec4:
         return this.alignAndSizeVector4(elementType);
-      case BufferDataTypeKind.Array:
-      case BufferDataTypeKind.Mat4x4: {
+      case BufferDataTypeKind.Array: {
         if (Array.isArray(dataEntry.data) || ArrayBuffer.isView(dataEntry.data)) {
           const length: number = dataEntry.data['length'];
           return this.alignAndSizeArray(elementType, length);
         }
+        break;
+      }
+      case BufferDataTypeKind.Mat3x3: {
+        return {
+          align: baseAlign * 2,
+          size: baseAlign * 2 * 3,
+        };
+      }
+      case BufferDataTypeKind.Mat4x4: {
+        return {
+          align: baseAlign * 2,
+          size: baseAlign * 2 * 4,
+        };
       }
     }
   }
@@ -192,7 +211,8 @@ export class WebGPUBuffer {
         if (ArrayBuffer.isView(value.data)) {
           byteLength = (value.data as ArrayBufferView).byteLength;
         } else if (Array.isArray(value.data)) {
-          byteLength = 4 * value.data['length'];
+          const factor = value.dataType.elementType === ScalarType.Float16 ? 2 : 4;
+          byteLength = factor * value.data['length'];
         }
       }
       size += byteLength + this.getPadding(byteLength, Math.max(this.structAlignment, value.align));
@@ -271,12 +291,23 @@ export class WebGPUBuffer {
               typedArray.set(value.data as Float32Array);
               break;
             }
+            case ScalarType.Float16: {
+              const typedArray = new Float16Array(
+                array,
+                offset,
+                (value.data as Float16Array).length,
+              );
+              typedArray.set(value.data as Float16Array);
+              break;
+            }
             default:
+              // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
               throw new Error(`Invalid elementType: ${value.dataType.elementType}`);
           }
           byteLength = (value.data as ArrayBufferView).byteLength;
           break;
         }
+        case BufferDataTypeKind.Mat3x3:
         case BufferDataTypeKind.Mat4x4: {
           switch (value.dataType.elementType) {
             case ScalarType.Float32: {

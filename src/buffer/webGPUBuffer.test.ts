@@ -56,16 +56,19 @@ describe('WebGPUBuffer', () => {
     [BufferDataTypeKind.Vec2, ScalarType.Int32, 8, [23, -42]],
     [BufferDataTypeKind.Vec2, ScalarType.Uint32, 8, [23, 42]],
     [BufferDataTypeKind.Vec2, ScalarType.Float32, 8, [1.23, 4.56]],
+    [BufferDataTypeKind.Vec2, ScalarType.Float16, 4, [1.23, 4.56]],
 
     [BufferDataTypeKind.Vec3, ScalarType.Bool, 16, [true, false, true]],
     [BufferDataTypeKind.Vec3, ScalarType.Int32, 16, [23, -42, 47]],
     [BufferDataTypeKind.Vec3, ScalarType.Uint32, 16, [23, 42, 47]],
     [BufferDataTypeKind.Vec3, ScalarType.Float32, 16, [1.23, 4.56, 0.321]],
+    [BufferDataTypeKind.Vec3, ScalarType.Float16, 8, [1.23, 4.56, 0.321]],
 
     [BufferDataTypeKind.Vec4, ScalarType.Bool, 16, [true, false, true, false]],
     [BufferDataTypeKind.Vec4, ScalarType.Int32, 16, [23, -42, 47, -11]],
     [BufferDataTypeKind.Vec4, ScalarType.Uint32, 16, [23, 42, 47, 11]],
     [BufferDataTypeKind.Vec4, ScalarType.Float32, 16, [1.23, 4.56, 0.321, 42.23]],
+    [BufferDataTypeKind.Vec4, ScalarType.Float16, 8, [1.23, 4.56, 0.321, 42.23]],
 
     [BufferDataTypeKind.Array, ScalarType.Bool, 20, [true, true, true, false, false]],
     [BufferDataTypeKind.Array, ScalarType.Int32, 20, [23, -42, 47, -11, 123]],
@@ -73,10 +76,51 @@ describe('WebGPUBuffer', () => {
     [BufferDataTypeKind.Array, ScalarType.Float32, 20, [1.23, 4.56, 0.321, 42.23, -1.23]],
 
     [
+      BufferDataTypeKind.Mat3x3,
+      ScalarType.Float32,
+      48,
+      // prettier-ignore
+      [
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,
+      ],
+    ],
+    [
+      BufferDataTypeKind.Mat3x3,
+      ScalarType.Float16,
+      24,
+      // prettier-ignore
+      [
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,
+      ],
+    ],
+
+    [
       BufferDataTypeKind.Mat4x4,
       ScalarType.Float32,
       64,
-      [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+      // prettier-ignore
+      [
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+      ],
+    ],
+    [
+      BufferDataTypeKind.Mat4x4,
+      ScalarType.Float16,
+      32,
+      // prettier-ignore
+      [
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+      ],
     ],
   ])(
     'single buffer data type kind: %s, and element type: %s size should be %i',
