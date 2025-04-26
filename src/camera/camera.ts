@@ -37,6 +37,10 @@ export class Camera {
     return this._projectionMatrix;
   }
 
+  public get eye(): Vec3 {
+    return this._eye;
+  }
+
   public translate(translation: Vec3) {
     vec3.add(this._eye, translation, this._eye);
     this.updateViewMatrix();
