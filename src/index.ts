@@ -18,3 +18,6 @@ export * from './bindGroup/webGPUBindGroupLayout';
 // pipelines
 export * from './pipeline/webGPUPipelineLayout';
 export * from './pipeline/webGPURenderPipeline';
+
+// helpers
+export * from './helpers/helpers';

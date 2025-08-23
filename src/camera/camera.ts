@@ -46,6 +46,16 @@ export class Camera {
     this.updateViewMatrix();
   }
 
+  public rotateX(angle: number) {
+    this._rotation = quat.rotateX(this._rotation, angle);
+    this.updateViewMatrix();
+  }
+
+  public rotateY(angle: number) {
+    this._rotation = quat.rotateY(this._rotation, angle);
+    this.updateViewMatrix();
+  }
+
   public rotateZ(angle: number) {
     this._rotation = quat.rotateZ(this._rotation, angle);
     this.updateViewMatrix();
