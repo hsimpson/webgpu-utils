@@ -25,8 +25,9 @@ export class CameraControls {
     if (event.buttons === 1) {
       const offset = vec2.subtract(currentPos, this._currentMousePosition);
       vec2.scale(offset, 0.005, offset);
-      this._camera.rotateY(offset[0]);
-      this._camera.rotateX(-offset[1]);
+      // this._camera.rotateY(offset[0]);
+      // this._camera.rotateX(-offset[1]);
+      this._camera.rotateEuler(vec3.create(offset[1], offset[0], 0.0));
     }
     this._currentMousePosition = currentPos;
   };

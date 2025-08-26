@@ -61,6 +61,16 @@ export class Camera {
     this.updateViewMatrix();
   }
 
+  public rotateQuat(rotation: Quat) {
+    quat.multiply(rotation, this._rotation, this._rotation);
+    this.updateViewMatrix();
+  }
+
+  public rotateEuler(angles: Vec3) {
+    const rotation = quat.fromEuler(angles[0], angles[1], angles[2], 'xzy');
+    this.rotateQuat(rotation);
+  }
+
   protected updateModelMatrix() {}
 
   protected updateViewMatrix() {
