@@ -1,7 +1,7 @@
 import { WebGPUContext } from '../context/webGPUContext';
 
 export class WebGPUBindGroupLayout {
-  private _webGPUContext: WebGPUContext;
+  private readonly _webGPUContext: WebGPUContext;
   private _bindGroupLayout?: GPUBindGroupLayout;
   private _bindGroupLayoutEntries: GPUBindGroupLayoutEntry[];
 

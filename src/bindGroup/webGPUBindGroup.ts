@@ -4,7 +4,7 @@ import { WebGPUBindGroupLayout } from './webGPUBindGroupLayout';
 export class WebGPUBindGroup {
   private readonly _webGPUContext: WebGPUContext;
   private _bindGroup?: GPUBindGroup;
-  private _webGPUBindGroupLayout: WebGPUBindGroupLayout;
+  private readonly _webGPUBindGroupLayout: WebGPUBindGroupLayout;
   private _bindGroupEntries: GPUBindGroupEntry[];
 
   public constructor(
