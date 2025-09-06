@@ -14,7 +14,7 @@ export default defineConfig({
       screenshotDirectory: 'screenshots',
       instances: [
         {
-          browser: 'chromium',
+          browser: 'firefox',
           launch: {
             args: [
               /*
@@ -30,7 +30,7 @@ export default defineConfig({
               security issues to websites so only use it for your own development.
               – Mac, Windows, Linux, ChromeOS, Android
               */
-              '--enable-unsafe-webgpu',
+              // '--enable-unsafe-webgpu',
             ],
           },
         },

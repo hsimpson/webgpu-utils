@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "check-types": "tsc --noEmit",
-    "lint:ts": "eslint . --fix",
+    "lint:ts": "eslint . --fix --concurrency auto",
     "lint": "yarn check-types && yarn lint:ts",
     "format:check": "prettier . --check",
     "format:fix": "prettier . --write",
@@ -31,7 +31,7 @@
     "test": "vitest run --reporter=verbose",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
-    "npm:publish": "yarn format:check && yarn build && yarn format:check && yarn test && npm publish",
+    "npm:publish": "yarn format:check && yarn lint && yarn build && yarn test && npm publish",
     "examples": "vite --config examples/vite.config.js"
   },
   "devDependencies": {

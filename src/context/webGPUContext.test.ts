@@ -5,17 +5,17 @@ describe('WebGPUContext', () => {
   let canvas: HTMLCanvasElement;
 
   it('should support WebGPU', () => {
-    const suppported = WebGPUContext.supportsWebGPU();
+    const supported = WebGPUContext.supportsWebGPU();
 
-    expect(suppported).toBe(true);
+    expect(supported).toBe(true);
   });
 
   it('should not support WebGPU', () => {
     vi.stubGlobal('navigator', { gpu: undefined });
 
-    const suppported = WebGPUContext.supportsWebGPU();
+    const supported = WebGPUContext.supportsWebGPU();
 
-    expect(suppported).toBe(false);
+    expect(supported).toBe(false);
   });
 
   it('should create context', async () => {
