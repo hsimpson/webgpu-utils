@@ -126,6 +126,14 @@ export class WebGPUBuffer {
     return this.gpuBuffer as GPUBuffer;
   }
 
+  public async mapRead(offset?: number, size?: number): Promise<ArrayBuffer> {
+    if (!this.gpuBuffer) {
+      throw new Error('Buffer not created');
+    }
+    await this.gpuBuffer.mapAsync(GPUMapMode.READ, offset, size);
+    return this.gpuBuffer.getMappedRange(offset, size);
+  }
+
   private roundUp(k: number, n: number): number {
     return Math.ceil(n / k) * k;
   }
