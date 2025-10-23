@@ -28,11 +28,6 @@ export default defineConfig({
         {
           browser: 'chromium',
           provider: playwright({
-            // Enable WebGPU in headless Chromium on Linux/CI. These flags are safe to leave on locally.
-            // - --enable-unsafe-webgpu: historically required to enable WebGPU in automation/headless
-            // - --enable-features=Vulkan: prefer the Vulkan backend (works with SwiftShader in CI)
-            // - --use-vulkan=swiftshader: force SwiftShader Vulkan if no real GPU is available
-            // Note: Newer Chromium versions may ignore some flags; leaving them causes no harm.
             launchOptions: {
               args: [...platformArgs],
             },
