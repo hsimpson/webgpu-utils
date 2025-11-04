@@ -2,6 +2,7 @@ import { WebGPUContext } from '../context/webGPUContext';
 
 // Info: alignment and size: https://www.w3.org/TR/WGSL/#alignment-and-size
 // Info: structure member alignment: https://www.w3.org/TR/WGSL/#structure-member-layout
+// Info: memory layout: https://webgpufundamentals.org/webgpu/lessons/webgpu-memory-layout.html
 
 export enum ScalarType {
   Bool = 'Bool',
