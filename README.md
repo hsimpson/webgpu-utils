@@ -8,7 +8,7 @@ Installing packages:
 
 ```sh
 yarn install
-yarn playwright install --with-deps
+yarn playwright install --with-deps # if --with-deps fails on your OS, then try without it, but you might need to install some dependencies manually.
 ```
 
 During development, you can run the build with the following command:
