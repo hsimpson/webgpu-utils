@@ -3,7 +3,7 @@ import { WebGPUContext } from '../context/webGPUContext';
 export class WebGPUShader {
   private readonly _webGPUContext: WebGPUContext;
   private _shaderModule?: GPUShaderModule;
-  private _entryPoint: string = 'main';
+  private _entryPoint = 'main';
   private _sourceCode?: string;
   private _sourceUrl?: URL;
 

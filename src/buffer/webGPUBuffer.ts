@@ -37,7 +37,7 @@ type AlignAndSize = {
   size: number;
 };
 
-const scalarTypeAlignAndSize: Map<ScalarType, AlignAndSize> = new Map([
+const scalarTypeAlignAndSize = new Map<ScalarType, AlignAndSize>([
   [ScalarType.Bool, { align: 4, size: 4 }],
   [ScalarType.Int32, { align: 4, size: 4 }],
   [ScalarType.Uint32, { align: 4, size: 4 }],
@@ -116,15 +116,13 @@ export class WebGPUBuffer {
 
   public writeBuffer() {
     const arrayBuffer = this.getArrayBuffer();
-    if (!this.gpuBuffer) {
-      this.gpuBuffer = this.create(arrayBuffer.byteLength);
-    }
+    this.gpuBuffer ??= this.create(arrayBuffer.byteLength);
 
     this.webGPUContext.queue.writeBuffer(this.gpuBuffer, 0, arrayBuffer);
   }
 
-  public getRawBuffer(): GPUBuffer {
-    return this.gpuBuffer as GPUBuffer;
+  public getRawBuffer(): GPUBuffer | undefined {
+    return this.gpuBuffer;
   }
 
   public async mapRead(offset?: number, size?: number): Promise<ArrayBuffer> {
@@ -186,7 +184,7 @@ export class WebGPUBuffer {
         return this.alignAndSizeVector4(elementType);
       case BufferDataTypeKind.Array: {
         if (Array.isArray(dataEntry.data) || ArrayBuffer.isView(dataEntry.data)) {
-          const length: number = dataEntry.data['length'];
+          const length: number = dataEntry.data.length;
           return this.alignAndSizeArray(elementType, length);
         }
         break;
@@ -221,7 +219,7 @@ export class WebGPUBuffer {
           byteLength = (value.data as ArrayBufferView).byteLength;
         } else if (Array.isArray(value.data)) {
           const factor = value.dataType.elementType === ScalarType.Float16 ? 2 : 4;
-          byteLength = factor * value.data['length'];
+          byteLength = factor * value.data.length;
         }
       }
       size += byteLength + this.getPadding(byteLength, Math.max(this.structAlignment, value.align));
@@ -234,7 +232,7 @@ export class WebGPUBuffer {
     let offset = 0;
 
     for (const value of this.bufferArray) {
-      let byteLength = 0;
+      let byteLength: number;
       switch (value.dataType.bufferDataTypeKind) {
         case BufferDataTypeKind.Scalar: {
           switch (value.dataType.elementType) {

@@ -71,7 +71,9 @@ export class Camera {
     this.rotateQuat(rotation);
   }
 
-  protected updateModelMatrix() {}
+  protected updateModelMatrix() {
+    // TODO: Implement model matrix updates if needed
+  }
 
   protected updateViewMatrix() {
     const translationMatrix = mat4.lookAt(this._eye, this._target, this._up);

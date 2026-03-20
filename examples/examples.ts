@@ -1,14 +1,14 @@
 type ExampleEntry = {
   name: string;
   title: string;
-  descrption: string;
+  description: string;
 };
 
 const examples: ExampleEntry[] = [
   {
     name: 'triangle',
     title: 'Triangle',
-    descrption: 'A simple triangle',
+    description: 'A simple triangle',
   },
 ];
 
@@ -20,7 +20,7 @@ function addExamples() {
     const listItem = document.createElement('li');
     const link = document.createElement('a');
     link.href = `./${example.name}/${example.name}.html`;
-    link.textContent = `${example.title} - ${example.descrption}`;
+    link.textContent = `${example.title} - ${example.description}`;
     listItem.appendChild(link);
     examplesList?.appendChild(listItem);
   });

@@ -4,7 +4,7 @@ import { BufferDataTypeKind, ScalarType, WebGPUBuffer } from './webGPUBuffer';
 
 describe('WebGPUBuffer', () => {
   const webGPUContext: WebGPUContext = {
-    device: { createBuffer: (_descriptor: GPUBufferDescriptor) => {} },
+    device: { createBuffer: (_descriptor: GPUBufferDescriptor) => undefined },
     queue: { writeBuffer: () => undefined },
   } as unknown as WebGPUContext;
   const deviceCreateBufferSpy = vi.spyOn(webGPUContext.device, 'createBuffer');
