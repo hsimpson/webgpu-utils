@@ -170,11 +170,16 @@ class TriangleRenderer {
     ]);
     uniformBindGroupLayout.createBindGroupLayout();
 
+    const uniformBufferRawBuffer = this.uniformBuffer.getRawBuffer();
+    if (!uniformBufferRawBuffer) {
+      console.error('Failed to get uniform buffer raw buffer');
+      return;
+    }
     this.uniformBindGroup = new WebGPUBindGroup(this.webGPUContext, uniformBindGroupLayout, [
       {
         binding: 0,
         resource: {
-          buffer: this.uniformBuffer.getRawBuffer(),
+          buffer: uniformBufferRawBuffer,
         },
       },
     ]);
@@ -294,7 +299,13 @@ class TriangleRenderer {
     );
     passEncoder.setVertexBuffer(0, this.positionsBuffer.getRawBuffer());
     passEncoder.setVertexBuffer(1, this.colorsBuffer.getRawBuffer());
-    passEncoder.setIndexBuffer(this.indicesBuffer.getRawBuffer(), 'uint16');
+
+    const indicesBufferRawBuffer = this.indicesBuffer.getRawBuffer();
+    if (!indicesBufferRawBuffer) {
+      console.error('Failed to get indices buffer raw buffer');
+      return;
+    }
+    passEncoder.setIndexBuffer(indicesBufferRawBuffer, 'uint16');
     passEncoder.drawIndexed(3, 1, 0, 0, 0);
     passEncoder.end();
     this.webGPUContext.queue.submit([commandEncoder.finish()]);
