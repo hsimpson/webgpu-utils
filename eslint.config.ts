@@ -32,15 +32,11 @@ export default defineConfig(
     },
   },
 
-  // typescript eslint rules
+  // customize typescript-eslint rules
   {
     rules: {
       '@typescript-eslint/consistent-type-definitions': 'off',
       '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'explicit' }],
-      // '@typescript-eslint/interface-name-prefix': 'off',
-      // '@typescript-eslint/no-floating-promises': 'error',
-      // '@typescript-eslint/no-parameter-properties': ['off'],
-      // '@typescript-eslint/no-require-imports': 'warn',
       '@typescript-eslint/no-shadow': 'error',
       '@typescript-eslint/no-unused-vars': [
         'warn',
