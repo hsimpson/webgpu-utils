@@ -55,7 +55,7 @@ export class CameraControls {
     this._camera.translate(vec3.create(x, 0, y));
   };
 
-  private onKeyup = (event: KeyboardEvent) => {
+  private onKeyup = (_event: KeyboardEvent) => {
     // currently not used
   };
 }

@@ -20,11 +20,23 @@ yarn watch
 To use the local version of the library in your project, you can run the following command:
 
 ```sh
-npm link
+yarn link
 ```
 
 Then, in your project, you can run:
 
 ```sh
-npm link @donnerknalli/webgpu-utils
+yarn link @donnerknalli/webgpu-utils
+```
+
+To unlink the package in your project, you can run:
+
+```sh
+npm unlink @donnerknalli/webgpu-utils
+```
+
+Then you can run the following command to unlink the package globally:
+
+```sh
+yarn unlink
 ```

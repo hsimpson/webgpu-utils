@@ -121,7 +121,10 @@ export class WebGPUBuffer {
     this.webGPUContext.queue.writeBuffer(this.gpuBuffer, 0, arrayBuffer);
   }
 
-  public getRawBuffer(): GPUBuffer | undefined {
+  public getRawBuffer(): GPUBuffer {
+    if (!this.gpuBuffer) {
+      throw new Error('Buffer not created');
+    }
     return this.gpuBuffer;
   }
 

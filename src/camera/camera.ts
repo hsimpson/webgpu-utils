@@ -67,7 +67,7 @@ export class Camera {
   }
 
   public rotateEuler(angles: Vec3) {
-    const rotation = quat.fromEuler(angles[0], angles[1], angles[2], 'xzy');
+    const rotation = quat.fromEuler(angles.at(0) ?? 0, angles.at(1) ?? 0, angles.at(2) ?? 0, 'xzy');
     this.rotateQuat(rotation);
   }
 
