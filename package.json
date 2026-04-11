@@ -1,6 +1,6 @@
 {
   "name": "@donnerknalli/webgpu-utils",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "author": "hsimpson",
   "description": "WebGPU Utilities",
   "license": "MIT",
