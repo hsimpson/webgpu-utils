@@ -1,37 +1,40 @@
-import { WebGPUContext } from '../context/webGPUContext';
+import { WebGPUObject, WebGPUObjectProps } from '../objects/webGPUObject';
 import { WebGPUBindGroupLayout } from './webGPUBindGroupLayout';
 
-export class WebGPUBindGroup {
-  private readonly _webGPUContext: WebGPUContext;
-  private _bindGroup?: GPUBindGroup;
-  private readonly _webGPUBindGroupLayout: WebGPUBindGroupLayout;
-  private _bindGroupEntries: GPUBindGroupEntry[];
+type WebGPUBindGroupProps = WebGPUObjectProps & {
+  webGPUBindGroupLayout: WebGPUBindGroupLayout;
+  bindGroupEntries?: GPUBindGroupEntry[];
+};
 
-  public constructor(
-    webGPUContext: WebGPUContext,
-    webGPUBindGroupLayout: WebGPUBindGroupLayout,
-    bindGroupEntries?: GPUBindGroupEntry[],
-  ) {
-    this._webGPUContext = webGPUContext;
-    this._webGPUBindGroupLayout = webGPUBindGroupLayout;
-    this._bindGroupEntries = bindGroupEntries ?? [];
+export class WebGPUBindGroup extends WebGPUObject {
+  private bindGroup?: GPUBindGroup;
+  private readonly webGPUBindGroupLayout: WebGPUBindGroupLayout;
+  private readonly bindGroupEntries: GPUBindGroupEntry[];
+
+  public constructor(webGPUBindGroupProps: WebGPUBindGroupProps) {
+    super({
+      ...webGPUBindGroupProps,
+      label: webGPUBindGroupProps.label ?? 'webgpu-bind-group',
+    });
+    this.webGPUBindGroupLayout = webGPUBindGroupProps.webGPUBindGroupLayout;
+    this.bindGroupEntries = webGPUBindGroupProps.bindGroupEntries ?? [];
   }
 
   public addBindGroupEntry(bindGroupEntry: GPUBindGroupEntry) {
-    this._bindGroupEntries.push(bindGroupEntry);
+    this.bindGroupEntries.push(bindGroupEntry);
   }
 
   public createBindGroup() {
-    this._bindGroup = this._webGPUContext.device.createBindGroup({
-      layout: this._webGPUBindGroupLayout.bindGroupLayout,
-      entries: this._bindGroupEntries,
+    this.bindGroup = this.webGPUContext.device.createBindGroup({
+      layout: this.webGPUBindGroupLayout.bindGroupLayout,
+      entries: this.bindGroupEntries,
     });
   }
 
-  public get bindGroup(): GPUBindGroup {
-    if (!this._bindGroup) {
+  public getRawBindGroup(): GPUBindGroup {
+    if (!this.bindGroup) {
       throw new Error('Bind group is not created yet.');
     }
-    return this._bindGroup;
+    return this.bindGroup;
   }
 }

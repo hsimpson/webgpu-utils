@@ -15,11 +15,11 @@ describe('WebGPUBuffer', () => {
   });
 
   it('should create buffer', () => {
-    const buffer = new WebGPUBuffer(
+    const buffer = new WebGPUBuffer({
       webGPUContext,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      'uniformBuffer',
-    );
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      label: 'uniformBuffer',
+    });
 
     expect(buffer).toBeDefined();
   });
@@ -36,7 +36,11 @@ describe('WebGPUBuffer', () => {
       // given
       const label = `single-scalar-test-${scalarType}`;
       const usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
-      const buffer = new WebGPUBuffer(webGPUContext, usage, label);
+      const buffer = new WebGPUBuffer({
+        webGPUContext,
+        usage,
+        label,
+      });
 
       // when
       buffer.setData(`single-scalar-test-${scalarType}`, {
@@ -133,7 +137,11 @@ describe('WebGPUBuffer', () => {
       // given
       const label = `single-array-test-${bufferDataTypeKind}-with-${scalarType}`;
       const usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
-      const buffer = new WebGPUBuffer(webGPUContext, usage, label);
+      const buffer = new WebGPUBuffer({
+        webGPUContext,
+        usage,
+        label,
+      });
 
       // when
       buffer.setData(`single-array-test-${bufferDataTypeKind}`, {

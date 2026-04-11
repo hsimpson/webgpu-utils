@@ -1,4 +1,4 @@
-import { WebGPUContext } from '../context/webGPUContext';
+import { WebGPUObject, WebGPUObjectProps } from '../objects/webGPUObject';
 
 // Info: alignment and size: https://www.w3.org/TR/WGSL/#alignment-and-size
 // Info: structure member alignment: https://www.w3.org/TR/WGSL/#structure-member-layout
@@ -62,7 +62,12 @@ type BufferDataEntry = {
 
 type BufferDataEntryWithAlignment = BufferDataEntry & AlignAndSize;
 
-export class WebGPUBuffer {
+type WebGPUBufferProperties = WebGPUObjectProps & {
+  usage: GPUBufferUsageFlags;
+};
+export class WebGPUBuffer extends WebGPUObject {
+  private readonly usage: GPUBufferUsageFlags;
+
   private gpuBuffer?: GPUBuffer;
 
   // to access the buffer array by key
@@ -70,11 +75,10 @@ export class WebGPUBuffer {
   private readonly bufferArray: BufferDataEntryWithAlignment[] = [];
   private structAlignment = 0;
 
-  public constructor(
-    private readonly webGPUContext: WebGPUContext,
-    private readonly usage: GPUBufferUsageFlags,
-    private readonly label?: string,
-  ) {}
+  public constructor(webGPUBufferProperties: WebGPUBufferProperties) {
+    super({ ...webGPUBufferProperties, label: webGPUBufferProperties.label ?? 'webgpu-buffer' });
+    this.usage = webGPUBufferProperties.usage;
+  }
 
   public setData(key: string, dataEntry: BufferDataEntry) {
     const { elementType, bufferDataTypeKind } = dataEntry.dataType;

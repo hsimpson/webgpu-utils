@@ -1,80 +1,84 @@
-import { WebGPUContext } from '../context/webGPUContext';
+import { WebGPUObject, WebGPUObjectProps } from '../objects/webGPUObject';
 import { WebGPUShader } from '../shader/webGPUShader';
 import { WebGPUPipelineLayout } from './webGPUPipelineLayout';
 
-export class WebGPURenderPipeline {
-  private _renderPipeLine?: GPURenderPipeline;
-  private readonly _webGPUContext: WebGPUContext;
-  private readonly _webGPUPipelineLayout: WebGPUPipelineLayout;
-  private readonly _vertexShader: WebGPUShader;
-  private readonly _fragmentShader?: WebGPUShader;
+type WebGPURenderPipelineProps = WebGPUObjectProps & {
+  webGPUPipelineLayout: WebGPUPipelineLayout;
+  vertexShader: WebGPUShader;
+  fragmentShader?: WebGPUShader;
+};
 
-  private _vertexBufferLayouts: GPUVertexBufferLayout[] = [];
-  private _colorTargetStates: GPUColorTargetState[] = [];
+export class WebGPURenderPipeline extends WebGPUObject {
+  private renderPipeLine?: GPURenderPipeline;
+  private readonly webGPUPipelineLayout: WebGPUPipelineLayout;
+  private readonly vertexShader: WebGPUShader;
+  private readonly fragmentShader?: WebGPUShader;
 
-  private _primitiveState?: GPUPrimitiveState;
-  private _depthStencilState?: GPUDepthStencilState;
-  private _multisampleState?: GPUMultisampleState;
+  private readonly vertexBufferLayouts: GPUVertexBufferLayout[] = [];
+  private readonly colorTargetStates: GPUColorTargetState[] = [];
 
-  public constructor(
-    webGPUContext: WebGPUContext,
-    webGPUPipelineLayout: WebGPUPipelineLayout,
-    vertexShader: WebGPUShader,
-    fragmentShader?: WebGPUShader,
-  ) {
-    this._webGPUContext = webGPUContext;
-    this._webGPUPipelineLayout = webGPUPipelineLayout;
-    this._vertexShader = vertexShader;
-    this._fragmentShader = fragmentShader;
+  private primitiveState?: GPUPrimitiveState;
+  private depthStencilState?: GPUDepthStencilState;
+  private multisampleState?: GPUMultisampleState;
+
+  public constructor(webGPURenderPipelineProps: WebGPURenderPipelineProps) {
+    super({
+      ...webGPURenderPipelineProps,
+      label: webGPURenderPipelineProps.label ?? 'webgpu-render-pipeline',
+    });
+    this.webGPUPipelineLayout = webGPURenderPipelineProps.webGPUPipelineLayout;
+    this.vertexShader = webGPURenderPipelineProps.vertexShader;
+    this.fragmentShader = webGPURenderPipelineProps.fragmentShader;
   }
 
   public addVertexBufferLayout(bufferLayout: GPUVertexBufferLayout) {
-    this._vertexBufferLayouts.push(bufferLayout);
+    this.vertexBufferLayouts.push(bufferLayout);
   }
 
   public addColorTargetState(colorTargetState: GPUColorTargetState) {
-    this._colorTargetStates.push(colorTargetState);
+    this.colorTargetStates.push(colorTargetState);
   }
 
   public setPrimitiveState(primitiveState: GPUPrimitiveState) {
-    this._primitiveState = primitiveState;
+    this.primitiveState = primitiveState;
   }
   public setDepthStencilState(depthStencilState: GPUDepthStencilState) {
-    this._depthStencilState = depthStencilState;
+    this.depthStencilState = depthStencilState;
   }
   public setMultisampleState(multisampleState: GPUMultisampleState) {
-    this._multisampleState = multisampleState;
+    this.multisampleState = multisampleState;
   }
 
   public createRenderPipeline() {
     let fragment: GPUFragmentState | undefined;
 
-    if (this._fragmentShader) {
+    if (this.fragmentShader) {
       fragment = {
-        module: this._fragmentShader.shaderModule,
-        entryPoint: this._fragmentShader.entryPoint,
-        targets: this._colorTargetStates,
+        module: this.fragmentShader.getRawShaderModule(),
+        entryPoint: this.fragmentShader.getEntryPoint(),
+        targets: this.colorTargetStates,
       };
     }
 
-    this._renderPipeLine = this._webGPUContext.device.createRenderPipeline({
-      layout: this._webGPUPipelineLayout.pipelineLayout,
+    this.renderPipeLine = this.webGPUContext.device.createRenderPipeline({
+      layout: this.webGPUPipelineLayout.getRawPipelineLayout(),
       vertex: {
-        module: this._vertexShader.shaderModule,
-        entryPoint: this._vertexShader.entryPoint,
-        buffers: this._vertexBufferLayouts,
+        module: this.vertexShader.getRawShaderModule(),
+        entryPoint: this.vertexShader.getEntryPoint(),
+        buffers: this.vertexBufferLayouts,
       },
-      primitive: this._primitiveState,
-      depthStencil: this._depthStencilState,
-      multisample: this._multisampleState,
+      primitive: this.primitiveState,
+      depthStencil: this.depthStencilState,
+      multisample: this.multisampleState,
       fragment,
+      label: this.label,
     });
   }
 
-  public get renderPipeLine(): GPURenderPipeline {
-    if (!this._renderPipeLine) {
+  public getRawRenderPipeline(): GPURenderPipeline {
+    if (!this.renderPipeLine) {
       throw new Error('Render pipeline has not been created yet.');
     }
-    return this._renderPipeLine;
+    return this.renderPipeLine;
   }
 }

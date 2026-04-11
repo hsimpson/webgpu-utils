@@ -1,46 +1,50 @@
-import { WebGPUContext } from '../context/webGPUContext';
+import { WebGPUObject, WebGPUObjectProps } from '../objects/webGPUObject';
 
-export class WebGPUShader {
-  private readonly _webGPUContext: WebGPUContext;
-  private _shaderModule?: GPUShaderModule;
-  private _entryPoint = 'main';
-  private _sourceCode?: string;
-  private _sourceUrl?: URL;
+type WebGPUShaderProps = WebGPUObjectProps & {
+  source: URL | string;
+  entryPoint?: string;
+};
 
-  public constructor(webGPUContext: WebGPUContext, source: URL | string) {
-    this._webGPUContext = webGPUContext;
-    if (source instanceof URL) {
-      this._sourceUrl = source;
+export class WebGPUShader extends WebGPUObject {
+  private shaderModule?: GPUShaderModule;
+  private readonly entryPoint: string;
+  private sourceCode?: string;
+  private sourceUrl?: URL;
+
+  public constructor(webGPUShaderProps: WebGPUShaderProps) {
+    super({
+      ...webGPUShaderProps,
+      label: webGPUShaderProps.label ?? 'webgpu-shader',
+    });
+    if (webGPUShaderProps.source instanceof URL) {
+      this.sourceUrl = webGPUShaderProps.source;
     } else {
-      this._sourceCode = source;
+      this.sourceCode = webGPUShaderProps.source;
     }
+    this.entryPoint = webGPUShaderProps.entryPoint ?? 'main';
   }
 
-  public get shaderModule(): GPUShaderModule {
-    if (!this._shaderModule) {
+  public getEntryPoint(): string {
+    return this.entryPoint;
+  }
+
+  public getRawShaderModule(): GPUShaderModule {
+    if (!this.shaderModule) {
       throw new Error('Shader module has not been created yet.');
     }
-    return this._shaderModule;
-  }
-
-  public get entryPoint(): string {
-    return this._entryPoint;
-  }
-
-  public set entryPoint(value: string) {
-    this._entryPoint = value;
+    return this.shaderModule;
   }
 
   public async createShaderModule() {
     let sourceCode: string;
-    if (this._sourceUrl) {
-      sourceCode = await this.loadByUrl(this._sourceUrl.toString());
-    } else if (this._sourceCode) {
-      sourceCode = this._sourceCode;
+    if (this.sourceUrl) {
+      sourceCode = await this.loadByUrl(this.sourceUrl.toString());
+    } else if (this.sourceCode) {
+      sourceCode = this.sourceCode;
     } else {
       throw new Error('Shader source is not provided.');
     }
-    this._shaderModule = this._webGPUContext.device.createShaderModule({
+    this.shaderModule = this.webGPUContext.device.createShaderModule({
       code: sourceCode,
     });
   }

@@ -11,7 +11,7 @@ import {
   WebGPUPipelineLayout,
   WebGPURenderPipeline,
   WebGPUShader,
-} from '../../dist/';
+} from '../../src/';
 
 /*
           C
@@ -93,11 +93,11 @@ class TriangleRenderer {
     this.depthTargetView = depthTarget.createView();
 
     // create a uniform buffer to hold camera data
-    this.uniformBuffer = new WebGPUBuffer(
-      this.webGPUContext,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      'uniform-buffer',
-    );
+    this.uniformBuffer = new WebGPUBuffer({
+      webGPUContext: this.webGPUContext,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      label: 'uniform-buffer',
+    });
     this.uniformBuffer.setData('model-matrix', {
       data: this.camera.modelMatrix,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Mat4x4 },
@@ -113,33 +113,33 @@ class TriangleRenderer {
     this.uniformBuffer.writeBuffer();
 
     // create buffers for the triangle
-    this.positionsBuffer = new WebGPUBuffer(
-      this.webGPUContext,
-      GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-      'positions-buffer',
-    );
+    this.positionsBuffer = new WebGPUBuffer({
+      webGPUContext: this.webGPUContext,
+      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+      label: 'positions-buffer',
+    });
     this.positionsBuffer.setData('positions', {
       data: POSITIONS,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this.positionsBuffer.writeBuffer();
 
-    this.colorsBuffer = new WebGPUBuffer(
-      this.webGPUContext,
-      GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-      'colors-buffer',
-    );
+    this.colorsBuffer = new WebGPUBuffer({
+      webGPUContext: this.webGPUContext,
+      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+      label: 'colors-buffer',
+    });
     this.colorsBuffer.setData('colors', {
       data: COLORS,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this.colorsBuffer.writeBuffer();
 
-    this.indicesBuffer = new WebGPUBuffer(
-      this.webGPUContext,
-      GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-      'indices-buffer',
-    );
+    this.indicesBuffer = new WebGPUBuffer({
+      webGPUContext: this.webGPUContext,
+      usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+      label: 'indices-buffer',
+    });
     this.indicesBuffer.setData('indices', {
       data: INDICES,
       dataType: { elementType: ScalarType.Uint16, bufferDataTypeKind: BufferDataTypeKind.Array },
@@ -147,16 +147,16 @@ class TriangleRenderer {
     this.indicesBuffer.writeBuffer();
 
     // load shaders
-    const vertexShader = new WebGPUShader(
-      this.webGPUContext,
-      new URL('shaders/triangle.vert.wgsl', window.location.href),
-    );
+    const vertexShader = new WebGPUShader({
+      webGPUContext: this.webGPUContext,
+      source: new URL('shaders/triangle.vert.wgsl', window.location.href),
+    });
     await vertexShader.createShaderModule();
 
-    const fragmentShader = new WebGPUShader(
-      this.webGPUContext,
-      new URL('shaders/triangle.frag.wgsl', window.location.href),
-    );
+    const fragmentShader = new WebGPUShader({
+      webGPUContext: this.webGPUContext,
+      source: new URL('shaders/triangle.frag.wgsl', window.location.href),
+    });
     await fragmentShader.createShaderModule();
 
     const uniformBindGroupLayout = new WebGPUBindGroupLayout(this.webGPUContext, [
@@ -170,27 +170,32 @@ class TriangleRenderer {
     ]);
     uniformBindGroupLayout.createBindGroupLayout();
 
-    this.uniformBindGroup = new WebGPUBindGroup(this.webGPUContext, uniformBindGroupLayout, [
-      {
-        binding: 0,
-        resource: {
-          buffer: this.uniformBuffer.getRawBuffer(),
+    this.uniformBindGroup = new WebGPUBindGroup({
+      webGPUContext: this.webGPUContext,
+      webGPUBindGroupLayout: uniformBindGroupLayout,
+      bindGroupEntries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this.uniformBuffer.getRawBuffer(),
+          },
         },
-      },
-    ]);
+      ],
+    });
     this.uniformBindGroup.createBindGroup();
 
-    const webGPUPipelineLayout = new WebGPUPipelineLayout(this.webGPUContext, [
-      uniformBindGroupLayout,
-    ]);
+    const webGPUPipelineLayout = new WebGPUPipelineLayout({
+      webGPUContext: this.webGPUContext,
+      webGPUBindGroupLayouts: [uniformBindGroupLayout],
+    });
     webGPUPipelineLayout.createPipelineLayout();
 
-    this.renderPipeLine = new WebGPURenderPipeline(
-      this.webGPUContext,
-      webGPUPipelineLayout,
-      vertexShader,
-      fragmentShader,
-    );
+    this.renderPipeLine = new WebGPURenderPipeline({
+      webGPUContext: this.webGPUContext,
+      webGPUPipelineLayout: webGPUPipelineLayout,
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+    });
     this.renderPipeLine.addVertexBufferLayout({
       arrayStride: 3 * Float32Array.BYTES_PER_ELEMENT,
       stepMode: 'vertex',
@@ -214,7 +219,7 @@ class TriangleRenderer {
       ],
     });
     this.renderPipeLine.addColorTargetState({
-      format: 'bgra8unorm',
+      format: this.webGPUContext.preferredCanvasFormat,
       blend: {
         alpha: {
           srcFactor: 'src-alpha',
@@ -276,8 +281,8 @@ class TriangleRenderer {
 
     const commandEncoder = this.webGPUContext.device.createCommandEncoder();
     const passEncoder = commandEncoder.beginRenderPass(renderPassDesc);
-    passEncoder.setPipeline(this.renderPipeLine.renderPipeLine);
-    passEncoder.setBindGroup(0, this.uniformBindGroup.bindGroup);
+    passEncoder.setPipeline(this.renderPipeLine.getRawRenderPipeline());
+    passEncoder.setBindGroup(0, this.uniformBindGroup.getRawBindGroup());
     passEncoder.setViewport(
       0,
       0,

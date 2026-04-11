@@ -1,29 +1,36 @@
 import { WebGPUBindGroupLayout } from '../bindGroup/webGPUBindGroupLayout';
-import { WebGPUContext } from '../context/webGPUContext';
+import { WebGPUObject, WebGPUObjectProps } from '../objects/webGPUObject';
 
-export class WebGPUPipelineLayout {
-  private _pipelineLayout?: GPUPipelineLayout;
-  private readonly _webGPUContext: WebGPUContext;
-  private _webGPUBindGroupLayouts: WebGPUBindGroupLayout[];
+type WebGPUPipelineLayoutProps = WebGPUObjectProps & {
+  webGPUBindGroupLayouts?: WebGPUBindGroupLayout[];
+};
 
-  public constructor(
-    webGPUContext: WebGPUContext,
-    webGPUBindGroupLayouts?: WebGPUBindGroupLayout[],
-  ) {
-    this._webGPUContext = webGPUContext;
-    this._webGPUBindGroupLayouts = webGPUBindGroupLayouts ?? [];
+export class WebGPUPipelineLayout extends WebGPUObject {
+  private pipelineLayout?: GPUPipelineLayout;
+  private readonly bindGroupLayouts: WebGPUBindGroupLayout[];
+
+  public constructor(webGPUPipelineLayoutProps: WebGPUPipelineLayoutProps) {
+    super({
+      ...webGPUPipelineLayoutProps,
+      label: webGPUPipelineLayoutProps.label ?? 'webgpu-pipeline-layout',
+    });
+    this.bindGroupLayouts = webGPUPipelineLayoutProps.webGPUBindGroupLayouts ?? [];
+  }
+
+  public addBindGroupLayout(webGPUBindGroupLayout: WebGPUBindGroupLayout) {
+    this.bindGroupLayouts.push(webGPUBindGroupLayout);
   }
 
   public createPipelineLayout() {
-    this._pipelineLayout = this._webGPUContext.device.createPipelineLayout({
-      bindGroupLayouts: this._webGPUBindGroupLayouts.map(layout => layout.bindGroupLayout),
+    this.pipelineLayout = this.webGPUContext.device.createPipelineLayout({
+      bindGroupLayouts: this.bindGroupLayouts.map(layout => layout.bindGroupLayout),
     });
   }
 
-  public get pipelineLayout(): GPUPipelineLayout {
-    if (!this._pipelineLayout) {
+  public getRawPipelineLayout(): GPUPipelineLayout {
+    if (!this.pipelineLayout) {
       throw new Error('Pipeline layout has not been created yet.');
     }
-    return this._pipelineLayout;
+    return this.pipelineLayout;
   }
 }
