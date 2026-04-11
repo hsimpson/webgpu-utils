@@ -2,6 +2,6 @@
   "recommendations": [
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "noah-labrecque.wgsl-lang"
+    "wgsl-analyzer.wgsl-analyzer"
   ]
 }
