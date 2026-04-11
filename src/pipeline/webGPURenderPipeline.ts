@@ -3,14 +3,14 @@ import { WebGPUShader } from '../shader/webGPUShader';
 import { WebGPUPipelineLayout } from './webGPUPipelineLayout';
 
 type WebGPURenderPipelineProps = WebGPUObjectProps & {
-  webGPUPipelineLayout: WebGPUPipelineLayout;
+  pipelineLayout: WebGPUPipelineLayout;
   vertexShader: WebGPUShader;
   fragmentShader?: WebGPUShader;
 };
 
 export class WebGPURenderPipeline extends WebGPUObject {
   private renderPipeLine?: GPURenderPipeline;
-  private readonly webGPUPipelineLayout: WebGPUPipelineLayout;
+  private readonly pipelineLayout: WebGPUPipelineLayout;
   private readonly vertexShader: WebGPUShader;
   private readonly fragmentShader?: WebGPUShader;
 
@@ -26,7 +26,7 @@ export class WebGPURenderPipeline extends WebGPUObject {
       ...webGPURenderPipelineProps,
       label: webGPURenderPipelineProps.label ?? 'webgpu-render-pipeline',
     });
-    this.webGPUPipelineLayout = webGPURenderPipelineProps.webGPUPipelineLayout;
+    this.pipelineLayout = webGPURenderPipelineProps.pipelineLayout;
     this.vertexShader = webGPURenderPipelineProps.vertexShader;
     this.fragmentShader = webGPURenderPipelineProps.fragmentShader;
   }
@@ -61,7 +61,7 @@ export class WebGPURenderPipeline extends WebGPUObject {
     }
 
     this.renderPipeLine = this.webGPUContext.device.createRenderPipeline({
-      layout: this.webGPUPipelineLayout.getRawPipelineLayout(),
+      layout: this.pipelineLayout.getRawPipelineLayout(),
       vertex: {
         module: this.vertexShader.getRawShaderModule(),
         entryPoint: this.vertexShader.getEntryPoint(),

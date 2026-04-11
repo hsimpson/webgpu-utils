@@ -1,32 +1,34 @@
-import { WebGPUContext } from '../context/webGPUContext';
+import { WebGPUObject, WebGPUObjectProps } from '../objects/webGPUObject';
 
-export class WebGPUBindGroupLayout {
-  private readonly _webGPUContext: WebGPUContext;
-  private _bindGroupLayout?: GPUBindGroupLayout;
-  private _bindGroupLayoutEntries: GPUBindGroupLayoutEntry[];
+type WebGPUBindGroupLayoutProps = WebGPUObjectProps & {
+  bindGroupLayoutEntries?: GPUBindGroupLayoutEntry[];
+};
+export class WebGPUBindGroupLayout extends WebGPUObject {
+  private bindGroupLayout?: GPUBindGroupLayout;
+  private bindGroupLayoutEntries: GPUBindGroupLayoutEntry[];
 
-  public constructor(
-    webGPUContext: WebGPUContext,
-    bindGroupLayoutEntries?: GPUBindGroupLayoutEntry[],
-  ) {
-    this._webGPUContext = webGPUContext;
-    this._bindGroupLayoutEntries = bindGroupLayoutEntries ?? [];
+  public constructor(webGPUBindGroupLayoutProps: WebGPUBindGroupLayoutProps) {
+    super({
+      ...webGPUBindGroupLayoutProps,
+      label: webGPUBindGroupLayoutProps.label ?? 'webgpu-bind-group-layout',
+    });
+    this.bindGroupLayoutEntries = webGPUBindGroupLayoutProps.bindGroupLayoutEntries ?? [];
   }
 
   public addBindGroupLayoutEntry(bindGroupLayoutEntry: GPUBindGroupLayoutEntry) {
-    this._bindGroupLayoutEntries.push(bindGroupLayoutEntry);
+    this.bindGroupLayoutEntries.push(bindGroupLayoutEntry);
   }
 
   public createBindGroupLayout() {
-    this._bindGroupLayout = this._webGPUContext.device.createBindGroupLayout({
-      entries: this._bindGroupLayoutEntries,
+    this.bindGroupLayout = this.webGPUContext.device.createBindGroupLayout({
+      entries: this.bindGroupLayoutEntries,
     });
   }
 
-  public get bindGroupLayout(): GPUBindGroupLayout {
-    if (!this._bindGroupLayout) {
+  public getRawBindGroupLayout(): GPUBindGroupLayout {
+    if (!this.bindGroupLayout) {
       throw new Error('Bind group layout has not been created yet.');
     }
-    return this._bindGroupLayout;
+    return this.bindGroupLayout;
   }
 }

@@ -2,13 +2,13 @@ import { WebGPUObject, WebGPUObjectProps } from '../objects/webGPUObject';
 import { WebGPUBindGroupLayout } from './webGPUBindGroupLayout';
 
 type WebGPUBindGroupProps = WebGPUObjectProps & {
-  webGPUBindGroupLayout: WebGPUBindGroupLayout;
+  bindGroupLayout: WebGPUBindGroupLayout;
   bindGroupEntries?: GPUBindGroupEntry[];
 };
 
 export class WebGPUBindGroup extends WebGPUObject {
   private bindGroup?: GPUBindGroup;
-  private readonly webGPUBindGroupLayout: WebGPUBindGroupLayout;
+  private readonly bindGroupLayout: WebGPUBindGroupLayout;
   private readonly bindGroupEntries: GPUBindGroupEntry[];
 
   public constructor(webGPUBindGroupProps: WebGPUBindGroupProps) {
@@ -16,7 +16,7 @@ export class WebGPUBindGroup extends WebGPUObject {
       ...webGPUBindGroupProps,
       label: webGPUBindGroupProps.label ?? 'webgpu-bind-group',
     });
-    this.webGPUBindGroupLayout = webGPUBindGroupProps.webGPUBindGroupLayout;
+    this.bindGroupLayout = webGPUBindGroupProps.bindGroupLayout;
     this.bindGroupEntries = webGPUBindGroupProps.bindGroupEntries ?? [];
   }
 
@@ -26,7 +26,7 @@ export class WebGPUBindGroup extends WebGPUObject {
 
   public createBindGroup() {
     this.bindGroup = this.webGPUContext.device.createBindGroup({
-      layout: this.webGPUBindGroupLayout.bindGroupLayout,
+      layout: this.bindGroupLayout.getRawBindGroupLayout(),
       entries: this.bindGroupEntries,
     });
   }

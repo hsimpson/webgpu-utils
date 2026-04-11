@@ -150,29 +150,36 @@ class TriangleRenderer {
     const vertexShader = new WebGPUShader({
       webGPUContext: this.webGPUContext,
       source: new URL('shaders/triangle.vert.wgsl', window.location.href),
+      label: 'vertex-shader',
     });
     await vertexShader.createShaderModule();
 
     const fragmentShader = new WebGPUShader({
       webGPUContext: this.webGPUContext,
       source: new URL('shaders/triangle.frag.wgsl', window.location.href),
+      label: 'fragment-shader',
     });
     await fragmentShader.createShaderModule();
 
-    const uniformBindGroupLayout = new WebGPUBindGroupLayout(this.webGPUContext, [
-      {
-        binding: 0,
-        visibility: GPUShaderStage.VERTEX,
-        buffer: {
-          type: 'uniform',
+    const uniformBindGroupLayout = new WebGPUBindGroupLayout({
+      webGPUContext: this.webGPUContext,
+      label: 'uniform-bind-group-layout',
+      bindGroupLayoutEntries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {
+            type: 'uniform',
+          },
         },
-      },
-    ]);
+      ],
+    });
     uniformBindGroupLayout.createBindGroupLayout();
 
     this.uniformBindGroup = new WebGPUBindGroup({
       webGPUContext: this.webGPUContext,
-      webGPUBindGroupLayout: uniformBindGroupLayout,
+      label: 'uniform-bind-group',
+      bindGroupLayout: uniformBindGroupLayout,
       bindGroupEntries: [
         {
           binding: 0,
@@ -186,13 +193,15 @@ class TriangleRenderer {
 
     const webGPUPipelineLayout = new WebGPUPipelineLayout({
       webGPUContext: this.webGPUContext,
-      webGPUBindGroupLayouts: [uniformBindGroupLayout],
+      label: 'pipeline-layout',
+      bindGroupLayouts: [uniformBindGroupLayout],
     });
     webGPUPipelineLayout.createPipelineLayout();
 
     this.renderPipeLine = new WebGPURenderPipeline({
       webGPUContext: this.webGPUContext,
-      webGPUPipelineLayout: webGPUPipelineLayout,
+      label: 'render-pipeline',
+      pipelineLayout: webGPUPipelineLayout,
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
     });
