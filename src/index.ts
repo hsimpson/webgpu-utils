@@ -18,6 +18,7 @@ export * from './bindGroup/webGPUBindGroupLayout';
 // pipelines
 export * from './pipeline/webGPUPipelineLayout';
 export * from './pipeline/webGPURenderPipeline';
+export * from './pipeline/webGPUComputePipeline';
 
 // helpers
 export * from './helpers/helpers';

@@ -1,4 +1,5 @@
 import { WebGPUObject, WebGPUObjectProps } from '../objects/webGPUObject';
+import { preprocessShader } from './wgslpreprocessor';
 
 type WebGPUShaderProps = WebGPUObjectProps & {
   source: URL | string;
@@ -38,7 +39,7 @@ export class WebGPUShader extends WebGPUObject {
   public async createShaderModule() {
     let sourceCode: string;
     if (this.sourceUrl) {
-      sourceCode = await this.loadByUrl(this.sourceUrl.toString());
+      sourceCode = await preprocessShader(this.sourceUrl);
     } else if (this.sourceCode) {
       sourceCode = this.sourceCode;
     } else {
@@ -47,11 +48,5 @@ export class WebGPUShader extends WebGPUObject {
     this.shaderModule = this.webGPUContext.device.createShaderModule({
       code: sourceCode,
     });
-  }
-
-  private async loadByUrl(url: string): Promise<string> {
-    const response = await fetch(url);
-    const shaderCode = await response.text();
-    return shaderCode;
   }
 }

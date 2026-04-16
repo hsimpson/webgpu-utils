@@ -29,7 +29,7 @@ export class WebGPUPipelineLayout extends WebGPUObject {
 
   public getRawPipelineLayout(): GPUPipelineLayout {
     if (!this.pipelineLayout) {
-      throw new Error('Pipeline layout has not been created yet.');
+      throw new Error(`Pipeline layout '${this.label}' has not been created yet.`);
     }
     return this.pipelineLayout;
   }

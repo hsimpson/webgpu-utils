@@ -1,16 +1,13 @@
-import { WebGPUObject, WebGPUObjectProps } from '../objects/webGPUObject';
 import { WebGPUShader } from '../shader/webGPUShader';
-import { WebGPUPipelineLayout } from './webGPUPipelineLayout';
+import { WebGPUBasePipeline, WebGPUBasePipelineProps } from './webGPUBasePipeline';
 
-type WebGPURenderPipelineProps = WebGPUObjectProps & {
-  pipelineLayout: WebGPUPipelineLayout;
+type WebGPURenderPipelineProps = WebGPUBasePipelineProps & {
   vertexShader: WebGPUShader;
   fragmentShader?: WebGPUShader;
 };
 
-export class WebGPURenderPipeline extends WebGPUObject {
+export class WebGPURenderPipeline extends WebGPUBasePipeline {
   private renderPipeLine?: GPURenderPipeline;
-  private readonly pipelineLayout: WebGPUPipelineLayout;
   private readonly vertexShader: WebGPUShader;
   private readonly fragmentShader?: WebGPUShader;
 
@@ -26,7 +23,6 @@ export class WebGPURenderPipeline extends WebGPUObject {
       ...webGPURenderPipelineProps,
       label: webGPURenderPipelineProps.label ?? 'webgpu-render-pipeline',
     });
-    this.pipelineLayout = webGPURenderPipelineProps.pipelineLayout;
     this.vertexShader = webGPURenderPipelineProps.vertexShader;
     this.fragmentShader = webGPURenderPipelineProps.fragmentShader;
   }
