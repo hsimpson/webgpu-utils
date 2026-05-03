@@ -142,7 +142,7 @@ class TriangleRenderer {
     });
     this.indicesBuffer.setData('indices', {
       data: INDICES,
-      dataType: { elementType: ScalarType.Uint16, bufferDataTypeKind: BufferDataTypeKind.Array },
+      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this.indicesBuffer.writeBuffer();
 

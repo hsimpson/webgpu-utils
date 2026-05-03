@@ -9,7 +9,6 @@ export enum ScalarType {
 
   Int32 = 'Int32',
   Uint32 = 'Uint32',
-  Uint16 = 'Uint16',
 
   Float32 = 'Float32',
   Float16 = 'Float16',
@@ -41,7 +40,6 @@ const scalarTypeAlignAndSize = new Map<ScalarType, AlignAndSize>([
   [ScalarType.Bool, { align: 4, size: 4 }],
   [ScalarType.Int32, { align: 4, size: 4 }],
   [ScalarType.Uint32, { align: 4, size: 4 }],
-  [ScalarType.Uint16, { align: 2, size: 2 }],
   [ScalarType.Float32, { align: 4, size: 4 }],
   [ScalarType.Float16, { align: 2, size: 2 }],
 ]);
@@ -265,7 +263,7 @@ export class WebGPUBuffer extends WebGPUObject {
               break;
             }
             default:
-              throw new Error(`Invalid elementType: ${value.dataType.elementType}`);
+              throw new Error(`Invalid elementType: ${value.dataType.elementType as string}`);
           }
           byteLength = this.alignAndSizeScalar(value.dataType.elementType).size;
           break;
@@ -289,11 +287,6 @@ export class WebGPUBuffer extends WebGPUObject {
             case ScalarType.Uint32: {
               const typedArray = new Uint32Array(array, offset, (value.data as Uint32Array).length);
               typedArray.set(value.data as Uint32Array);
-              break;
-            }
-            case ScalarType.Uint16: {
-              const typedArray = new Uint16Array(array, offset, (value.data as Uint16Array).length);
-              typedArray.set(value.data as Uint16Array);
               break;
             }
             case ScalarType.Float32: {
