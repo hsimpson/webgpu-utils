@@ -5,7 +5,7 @@ export type WebGPUObjectProps = {
   label?: string;
 };
 
-export class WebGPUObject {
+export abstract class WebGPUObject {
   protected readonly webGPUContext: WebGPUContext;
   protected readonly label?: string;
 

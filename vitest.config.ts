@@ -1,5 +1,5 @@
 import { playwright } from '@vitest/browser-playwright';
-import { coverageConfigDefaults, defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
 
 const chromiumGpuOnLinuxFlags = ['--enable-features=Vulkan', '--use-vulkan=swiftshader'];
 const chromiumGpuOnWindowsFlags = ['--use-angle=d3d11', '--use-webgpu-adapter=swiftshader'];
@@ -18,7 +18,8 @@ export default defineConfig({
     exclude: ['**/node_modules/**', 'dist/**'],
     coverage: {
       provider: 'v8',
-      exclude: ['./src/index.ts', '**/src/_models/**', ...coverageConfigDefaults.exclude],
+      include: ['./src/**/*.ts'],
+      exclude: ['./src/index.ts'],
     },
     browser: {
       enabled: true,

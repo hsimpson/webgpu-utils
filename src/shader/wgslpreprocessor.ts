@@ -40,20 +40,13 @@ async function includeShaders(shaderUrl: URL): Promise<string> {
   const baseUrl = urlDirname(shaderUrlStr);
 
   while ((match = INCLUDE_REGEX.exec(shaderText)) !== null) {
-    // This is necessary to avoid infinite loops with zero-width matches
-    if (match.index === INCLUDE_REGEX.lastIndex) {
-      INCLUDE_REGEX.lastIndex++;
-    }
+    const replacement = match[0];
+    const filename = match[1] ?? '';
 
-    if (match.length === 2) {
-      const replacement = match[0];
-      const filename = match[1];
+    const includeUrl = new URL(filename, baseUrl);
+    const includeText = await includeShaders(includeUrl);
 
-      const includeUrl = new URL(filename ?? '', baseUrl);
-      const includeText = await includeShaders(includeUrl);
-
-      shaderText = shaderText.replace(replacement, includeText);
-    }
+    shaderText = shaderText.replace(replacement, includeText);
   }
 
   return shaderText;

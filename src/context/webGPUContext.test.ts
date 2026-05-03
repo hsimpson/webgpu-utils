@@ -23,9 +23,13 @@ describe('WebGPUContext', () => {
     const result = await webGPUContext.create();
 
     expect(result).toBeTruthy();
+    expect(webGPUContext.canvas).toBeInstanceOf(HTMLCanvasElement);
     expect(webGPUContext.gpuCanvasContext).toBeDefined();
     expect(webGPUContext.device).toBeDefined();
     expect(webGPUContext.queue).toBeDefined();
+    expect(webGPUContext.adapterLimits).toBeDefined();
+    expect(webGPUContext.adapterInfo).toBeDefined();
+    expect(webGPUContext.features).toBeDefined();
 
     assert.isString(webGPUContext.preferredCanvasFormat);
     expect(webGPUContext.preferredCanvasFormat.length).toBeGreaterThan(0);
