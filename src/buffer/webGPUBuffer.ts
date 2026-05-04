@@ -8,7 +8,9 @@ export enum ScalarType {
   Bool = 'Bool',
 
   Int32 = 'Int32',
+  Int16 = 'Int16',
   Uint32 = 'Uint32',
+  Uint16 = 'Uint16',
 
   Float32 = 'Float32',
   Float16 = 'Float16',
@@ -39,7 +41,9 @@ type AlignAndSize = {
 const scalarTypeAlignAndSize = new Map<ScalarType, AlignAndSize>([
   [ScalarType.Bool, { align: 4, size: 4 }],
   [ScalarType.Int32, { align: 4, size: 4 }],
+  [ScalarType.Int16, { align: 2, size: 2 }],
   [ScalarType.Uint32, { align: 4, size: 4 }],
+  [ScalarType.Uint16, { align: 2, size: 2 }],
   [ScalarType.Float32, { align: 4, size: 4 }],
   [ScalarType.Float16, { align: 2, size: 2 }],
 ]);
@@ -53,6 +57,7 @@ type BufferDataEntry = {
     | Float32Array
     | Float16Array
     | Int32Array
+    | Int16Array
     | Uint32Array
     | Uint16Array;
   dataType: BufferDataType;
@@ -177,7 +182,11 @@ export class WebGPUBuffer extends WebGPUObject {
     const { elementType, bufferDataTypeKind } = dataEntry.dataType;
 
     // used for matrices
-    const baseAlign = elementType === ScalarType.Float16 ? 4 : 8;
+    const isHalf =
+      elementType === ScalarType.Float16 ||
+      elementType === ScalarType.Int16 ||
+      elementType === ScalarType.Uint16;
+    const baseAlign = isHalf ? 4 : 8;
     switch (bufferDataTypeKind) {
       case BufferDataTypeKind.Scalar:
         return this.alignAndSizeScalar(elementType);
@@ -215,15 +224,20 @@ export class WebGPUBuffer extends WebGPUObject {
 
   private getBufferSize(): number {
     let size = 0;
+
     for (const value of this.bufferArray) {
       let byteLength = 0;
+      const isHalf =
+        value.dataType.elementType === ScalarType.Float16 ||
+        value.dataType.elementType === ScalarType.Int16 ||
+        value.dataType.elementType === ScalarType.Uint16;
       if (value.dataType.bufferDataTypeKind === BufferDataTypeKind.Scalar) {
         byteLength = value.align;
       } else {
         if (ArrayBuffer.isView(value.data)) {
           byteLength = (value.data as ArrayBufferView).byteLength;
         } else if (Array.isArray(value.data)) {
-          const factor = value.dataType.elementType === ScalarType.Float16 ? 2 : 4;
+          const factor = isHalf ? 2 : 4;
           byteLength = factor * value.data.length;
         }
       }
@@ -247,18 +261,28 @@ export class WebGPUBuffer extends WebGPUObject {
               typedArray[0] = value.data as number;
               break;
             }
+            case ScalarType.Int16: {
+              const typedArray = new Int16Array(array, offset, 1);
+              typedArray[0] = value.data as number;
+              break;
+            }
             case ScalarType.Uint32: {
               const typedArray = new Uint32Array(array, offset, 1);
               typedArray[0] = value.data as number;
               break;
             }
-            case ScalarType.Float16: {
-              const typedArray = new Float16Array(array, offset, 1);
+            case ScalarType.Uint16: {
+              const typedArray = new Uint16Array(array, offset, 1);
               typedArray[0] = value.data as number;
               break;
             }
             case ScalarType.Float32: {
               const typedArray = new Float32Array(array, offset, 1);
+              typedArray[0] = value.data as number;
+              break;
+            }
+            case ScalarType.Float16: {
+              const typedArray = new Float16Array(array, offset, 1);
               typedArray[0] = value.data as number;
               break;
             }
@@ -284,9 +308,19 @@ export class WebGPUBuffer extends WebGPUObject {
               typedArray.set(value.data as Int32Array);
               break;
             }
+            case ScalarType.Int16: {
+              const typedArray = new Int16Array(array, offset, (value.data as Int16Array).length);
+              typedArray.set(value.data as Int16Array);
+              break;
+            }
             case ScalarType.Uint32: {
               const typedArray = new Uint32Array(array, offset, (value.data as Uint32Array).length);
               typedArray.set(value.data as Uint32Array);
+              break;
+            }
+            case ScalarType.Uint16: {
+              const typedArray = new Uint16Array(array, offset, (value.data as Uint16Array).length);
+              typedArray.set(value.data as Uint16Array);
               break;
             }
             case ScalarType.Float32: {
