@@ -165,4 +165,229 @@ describe('WebGPUBuffer', () => {
       expect(queueWriteBufferSpy).toHaveBeenCalled();
     },
   );
+
+  it('should handle TypedArray data for Vec2 (ArrayBuffer.isView path)', () => {
+    const usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
+    const label = 'typed-array-vec2-test';
+    const buffer = new WebGPUBuffer({ webGPUContext, usage, label });
+
+    buffer.setData('vec2-key', {
+      data: new Float32Array([1.0, 2.0]),
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },
+    });
+    buffer.writeBuffer();
+
+    expect(deviceCreateBufferSpy).toHaveBeenCalledWith({ size: 8, usage, label });
+    expect(queueWriteBufferSpy).toHaveBeenCalled();
+  });
+
+  it.each([
+    [BufferDataTypeKind.Mat3x3, ScalarType.Int32],
+    [BufferDataTypeKind.Mat3x3, ScalarType.Bool],
+    [BufferDataTypeKind.Mat4x4, ScalarType.Uint32],
+    [BufferDataTypeKind.Mat4x4, ScalarType.Int16],
+  ])(
+    'should log error when %s has invalid element type %s',
+    (bufferDataTypeKind: BufferDataTypeKind, elementType: ScalarType) => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const buffer = new WebGPUBuffer({
+        webGPUContext,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+
+      buffer.setData('key', {
+        data: [1, 0, 0, 0, 1, 0, 0, 0, 1],
+        dataType: { elementType, bufferDataTypeKind },
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        `Invalid elementType ${elementType} for ${bufferDataTypeKind}`,
+      );
+      consoleSpy.mockRestore();
+    },
+  );
+
+  it('should log error when Array type has non-array data', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const buffer = new WebGPUBuffer({
+      webGPUContext,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    buffer.setData('key', {
+      data: 42,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith('Invalid data type', expect.anything());
+    consoleSpy.mockRestore();
+  });
+
+  it('should throw for unknown ScalarType', () => {
+    const buffer = new WebGPUBuffer({
+      webGPUContext,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    expect(() => {
+      buffer.setData('key', {
+        data: 42,
+        dataType: {
+          elementType: 'Unknown' as unknown as ScalarType,
+          bufferDataTypeKind: BufferDataTypeKind.Scalar,
+        },
+      });
+    }).toThrow('Unknown scalar type: Unknown');
+  });
+
+  it('should update existing entry when setData is called with the same key', () => {
+    const usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
+    const label = 'test-update-key';
+    const buffer = new WebGPUBuffer({ webGPUContext, usage, label });
+
+    buffer.setData('key', {
+      data: 1.0,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Scalar },
+    });
+    buffer.setData('key', {
+      data: 2.0,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Scalar },
+    });
+    buffer.writeBuffer();
+
+    expect(deviceCreateBufferSpy).toHaveBeenCalledWith({ size: 4, usage, label });
+  });
+
+  it('should reuse existing gpuBuffer on second writeBuffer call', () => {
+    const gpuBufferMock = {} as GPUBuffer;
+    const createBufferSpy = vi.fn().mockReturnValue(gpuBufferMock);
+    const writeBufferSpy = vi.fn();
+    const ctx = {
+      device: { createBuffer: createBufferSpy },
+      queue: { writeBuffer: writeBufferSpy },
+    } as unknown as WebGPUContext;
+
+    const buffer = new WebGPUBuffer({
+      webGPUContext: ctx,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    buffer.setData('key', {
+      data: 42,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Scalar },
+    });
+    buffer.writeBuffer();
+    buffer.writeBuffer();
+
+    expect(createBufferSpy).toHaveBeenCalledTimes(1);
+    expect(writeBufferSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('should throw when getRawBuffer called before writeBuffer', () => {
+    const buffer = new WebGPUBuffer({
+      webGPUContext,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    expect(() => buffer.getRawBuffer()).toThrow('Buffer not created');
+  });
+
+  it('should return gpu buffer after writeBuffer', () => {
+    const gpuBufferMock = {} as GPUBuffer;
+    const ctx = {
+      device: { createBuffer: vi.fn().mockReturnValue(gpuBufferMock) },
+      queue: { writeBuffer: vi.fn() },
+    } as unknown as WebGPUContext;
+
+    const buffer = new WebGPUBuffer({
+      webGPUContext: ctx,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    buffer.setData('key', {
+      data: 42,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Scalar },
+    });
+    buffer.writeBuffer();
+
+    expect(buffer.getRawBuffer()).toBe(gpuBufferMock);
+  });
+
+  it('should throw when mapRead called before writeBuffer', async () => {
+    const buffer = new WebGPUBuffer({
+      webGPUContext,
+      usage: GPUBufferUsage.COPY_SRC,
+    });
+    await expect(buffer.mapRead()).rejects.toThrow('Buffer not created');
+  });
+
+  it('should call mapAsync and getMappedRange on mapRead', async () => {
+    const mappedRange = new ArrayBuffer(4);
+    const gpuBufferMock = {
+      mapAsync: vi.fn().mockResolvedValue(undefined),
+      getMappedRange: vi.fn().mockReturnValue(mappedRange),
+    };
+    const ctx = {
+      device: { createBuffer: vi.fn().mockReturnValue(gpuBufferMock) },
+      queue: { writeBuffer: vi.fn() },
+    } as unknown as WebGPUContext;
+
+    const buffer = new WebGPUBuffer({ webGPUContext: ctx, usage: GPUBufferUsage.COPY_SRC });
+    buffer.setData('key', {
+      data: 42,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Scalar },
+    });
+    buffer.writeBuffer();
+
+    const result = await buffer.mapRead(0, 4);
+
+    expect(gpuBufferMock.mapAsync).toHaveBeenCalledWith(GPUMapMode.READ, 0, 4);
+    expect(gpuBufferMock.getMappedRange).toHaveBeenCalledWith(0, 4);
+    expect(result).toBe(mappedRange);
+  });
+
+  test.each([
+    [
+      'unknown elementType in Scalar kind',
+      {
+        data: 42,
+        dataType: { elementType: 'Unknown', bufferDataTypeKind: BufferDataTypeKind.Scalar },
+        align: 4,
+        size: 4,
+      },
+      'Invalid elementType: Unknown',
+    ],
+    [
+      'unknown elementType in Vec2 kind',
+      {
+        data: [1, 2],
+        dataType: { elementType: 'Unknown', bufferDataTypeKind: BufferDataTypeKind.Vec2 },
+        align: 8,
+        size: 8,
+      },
+      'Invalid elementType: Unknown',
+    ],
+    [
+      'unknown bufferDataTypeKind',
+      {
+        data: 42,
+        dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: 'Unknown' },
+        align: 4,
+        size: 4,
+      },
+      'Invalid bufferDataTypeKind',
+    ],
+  ])(
+    'should throw for %s (getArrayBuffer)',
+    (_description: string, injectedEntry: unknown, expectedError: string) => {
+      const buffer = new WebGPUBuffer({
+        webGPUContext,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+      (
+        buffer as unknown as Record<string, unknown[]> & { bufferArray: unknown[] }
+      ).bufferArray.push(injectedEntry);
+
+      expect(() => {
+        buffer.writeBuffer();
+      }).toThrow(expectedError);
+    },
+  );
 });

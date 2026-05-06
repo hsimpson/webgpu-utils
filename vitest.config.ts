@@ -25,6 +25,7 @@ export default defineConfig({
       enabled: true,
       provider: playwright(),
       screenshotDirectory: 'screenshots',
+      screenshotFailures: false,
       headless: true,
       instances: [
         {

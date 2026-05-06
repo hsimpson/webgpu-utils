@@ -5,22 +5,17 @@ export class Camera {
   private _projectionMatrix: Mat4 = mat4.identity();
   private _viewMatrix: Mat4 = mat4.identity();
 
-  private _fovY: number;
-  private _aspectRatio: number;
-
-  private readonly _near: number;
-  private readonly _far: number;
-
   private _target: Vec3 = vec3.create(0, 0, 0);
   private _up: Vec3 = vec3.create(0, 1, 0);
   private _eye: Vec3 = vec3.create(0, 0, 0);
   private _rotation: Quat = quat.identity();
 
-  public constructor(fovY: number, aspectRatio: number, near: number, far: number) {
-    this._near = near;
-    this._far = far;
-    this._fovY = fovY;
-    this._aspectRatio = aspectRatio;
+  public constructor(
+    private readonly _fovY: number,
+    private readonly _aspectRatio: number,
+    private readonly _near: number,
+    private readonly _far: number,
+  ) {
     this.updateViewMatrix();
     this.updateProjectionMatrix();
   }
